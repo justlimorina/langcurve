@@ -1,1 +1,6 @@
-/.agents
+node_modules/
+dist/
+.env
+.cache/
+langcurve.db
+langcurve.db-journal
