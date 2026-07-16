@@ -1,8 +1,7 @@
 import { prisma } from './prisma.js';
 import { WordCache } from '../modules/dictionary/word-cache.model.js';
 import { redis } from './redis.js';
-import sqlite3 from 'sqlite3';
-import { open, Database } from 'sqlite';
+import type { Database } from 'sqlite';
 import fs from 'fs';
 import path from 'path';
 
@@ -365,6 +364,9 @@ export const docStoreAdapter: IDocStoreAdapter = new DocStoreAdapter();
 
 // Initialize SQLite fallback database tables if needed
 export async function initializeSqliteFallback() {
+  const sqlite3 = (await import('sqlite3')).default;
+  const { open } = await import('sqlite');
+
   sqliteDb = await open({
     filename: './langcurve.db',
     driver: sqlite3.Database
