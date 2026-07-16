@@ -4,6 +4,9 @@
   "description": "Production-Grade English vocabulary learning website with multi-database architecture",
   "main": "dist/server.js",
   "type": "module",
+  "engines": {
+    "node": "20.18.0"
+  },
   "scripts": {
     "build": "tsc",
     "start": "node dist/server.js",
