@@ -1,0 +1,549 @@
+{
+  "synergy": {
+    "source": "freedictionary",
+    "rawPayload": [
+      {
+        "word": "synergy",
+        "phonetic": "/ˈsɪnədʒi/",
+        "phonetics": [
+          {
+            "text": "/ˈsɪnədʒi/",
+            "audio": ""
+          },
+          {
+            "text": "/ˈsɪnɚdʒi/",
+            "audio": ""
+          }
+        ],
+        "meanings": [
+          {
+            "partOfSpeech": "noun",
+            "definitions": [
+              {
+                "definition": "(systems theory) A synonym of binding energy.",
+                "synonyms": [],
+                "antonyms": []
+              },
+              {
+                "definition": "The cooperation of two or more nerves, muscles, organs, etc.",
+                "synonyms": [],
+                "antonyms": [],
+                "example": "the digestive synergy"
+              },
+              {
+                "definition": "The combined action of two or more drugs where the effects are stronger than their mere sum.",
+                "synonyms": [],
+                "antonyms": []
+              },
+              {
+                "definition": "Benefits resulting from combining different groups, people, objects or processes.",
+                "synonyms": [],
+                "antonyms": []
+              }
+            ],
+            "synonyms": [
+              "binding energy"
+            ],
+            "antonyms": []
+          }
+        ],
+        "license": {
+          "name": "CC BY-SA 3.0",
+          "url": "https://creativecommons.org/licenses/by-sa/3.0"
+        },
+        "sourceUrls": [
+          "https://en.wiktionary.org/wiki/synergy"
+        ]
+      }
+    ],
+    "createdAt": "2026-07-16T11:21:31.289Z"
+  },
+  "algorithm": {
+    "source": "freedictionary",
+    "rawPayload": [
+      {
+        "word": "algorithm",
+        "phonetic": "/ˈælɡəɹɪðm̩/",
+        "phonetics": [
+          {
+            "text": "/ˈælɡəɹɪðm̩/",
+            "audio": ""
+          },
+          {
+            "text": "/ˈælɡəˌɹɪðm̩/",
+            "audio": "https://api.dictionaryapi.dev/media/pronunciations/en/algorithm-us.mp3",
+            "sourceUrl": "https://commons.wikimedia.org/w/index.php?curid=14545597"
+          }
+        ],
+        "meanings": [
+          {
+            "partOfSpeech": "noun",
+            "definitions": [
+              {
+                "definition": "A collection of ordered steps that solve a mathematical problem. A precise step-by-step plan for a computational procedure that possibly begins with an input value and yields an output value in a finite number of steps.",
+                "synonyms": [],
+                "antonyms": []
+              },
+              {
+                "definition": "Calculation with Arabic numerals; algorism.",
+                "synonyms": [],
+                "antonyms": []
+              }
+            ],
+            "synonyms": [],
+            "antonyms": []
+          }
+        ],
+        "license": {
+          "name": "CC BY-SA 3.0",
+          "url": "https://creativecommons.org/licenses/by-sa/3.0"
+        },
+        "sourceUrls": [
+          "https://en.wiktionary.org/wiki/algorithm"
+        ]
+      }
+    ],
+    "createdAt": "2026-07-16T11:21:43.588Z"
+  },
+  "responsive": {
+    "source": "freedictionary",
+    "rawPayload": [
+      {
+        "word": "responsive",
+        "phonetic": "/ɹɪˈspɒnsɪv/",
+        "phonetics": [
+          {
+            "text": "/ɹɪˈspɒnsɪv/",
+            "audio": ""
+          }
+        ],
+        "meanings": [
+          {
+            "partOfSpeech": "adjective",
+            "definitions": [
+              {
+                "definition": "Answering, replying or responding",
+                "synonyms": [],
+                "antonyms": []
+              },
+              {
+                "definition": "Able to receive and respond to external stimuli",
+                "synonyms": [],
+                "antonyms": []
+              },
+              {
+                "definition": "Using antiphons; antiphonal",
+                "synonyms": [],
+                "antonyms": []
+              },
+              {
+                "definition": "Susceptible to the feelings of others",
+                "synonyms": [],
+                "antonyms": []
+              },
+              {
+                "definition": "Automatically resizing and repositioning elements to fit the available space",
+                "synonyms": [],
+                "antonyms": []
+              },
+              {
+                "definition": "Suited to something else; correspondent",
+                "synonyms": [],
+                "antonyms": []
+              },
+              {
+                "definition": "Responsible",
+                "synonyms": [],
+                "antonyms": []
+              }
+            ],
+            "synonyms": [],
+            "antonyms": [
+              "nonresponsive",
+              "unresponsive"
+            ]
+          }
+        ],
+        "license": {
+          "name": "CC BY-SA 3.0",
+          "url": "https://creativecommons.org/licenses/by-sa/3.0"
+        },
+        "sourceUrls": [
+          "https://en.wiktionary.org/wiki/responsive"
+        ]
+      }
+    ],
+    "createdAt": "2026-07-16T11:21:43.605Z"
+  },
+  "innovative": {
+    "source": "freedictionary",
+    "rawPayload": [
+      {
+        "word": "innovative",
+        "phonetic": "/ɪnˈnɒ.və.tɪv/",
+        "phonetics": [
+          {
+            "text": "/ɪnˈnɒ.və.tɪv/",
+            "audio": ""
+          },
+          {
+            "text": "/ˈɪn.oʊˌveɪɾɪv/",
+            "audio": "https://api.dictionaryapi.dev/media/pronunciations/en/innovative-us.mp3",
+            "sourceUrl": "https://commons.wikimedia.org/w/index.php?curid=7467895"
+          }
+        ],
+        "meanings": [
+          {
+            "partOfSpeech": "adjective",
+            "definitions": [
+              {
+                "definition": "Characterized by the creation of new ideas or inventions.",
+                "synonyms": [],
+                "antonyms": []
+              },
+              {
+                "definition": "Forward-looking; ahead of current thinking.",
+                "synonyms": [],
+                "antonyms": []
+              }
+            ],
+            "synonyms": [
+              "innovatory"
+            ],
+            "antonyms": []
+          }
+        ],
+        "license": {
+          "name": "CC BY-SA 3.0",
+          "url": "https://creativecommons.org/licenses/by-sa/3.0"
+        },
+        "sourceUrls": [
+          "https://en.wiktionary.org/wiki/innovative"
+        ]
+      }
+    ],
+    "createdAt": "2026-07-16T11:21:43.630Z"
+  },
+  "itinerary": {
+    "source": "freedictionary",
+    "rawPayload": [
+      {
+        "word": "itinerary",
+        "phonetic": "/aɪˈtɪnəɹi/",
+        "phonetics": [
+          {
+            "text": "/aɪˈtɪnəɹi/",
+            "audio": ""
+          },
+          {
+            "text": "/aɪˈtɪnəɹɛɹi/",
+            "audio": "https://api.dictionaryapi.dev/media/pronunciations/en/itinerary-us.mp3",
+            "sourceUrl": "https://commons.wikimedia.org/w/index.php?curid=1669320",
+            "license": {
+              "name": "BY-SA 3.0",
+              "url": "https://creativecommons.org/licenses/by-sa/3.0"
+            }
+          }
+        ],
+        "meanings": [
+          {
+            "partOfSpeech": "noun",
+            "definitions": [
+              {
+                "definition": "A written schedule of activities for a vacation or road trip.",
+                "synonyms": [],
+                "antonyms": []
+              },
+              {
+                "definition": "A route or proposed route of a journey.",
+                "synonyms": [],
+                "antonyms": []
+              },
+              {
+                "definition": "An account or record of a journey.",
+                "synonyms": [],
+                "antonyms": []
+              },
+              {
+                "definition": "A guidebook for travellers.",
+                "synonyms": [],
+                "antonyms": []
+              }
+            ],
+            "synonyms": [],
+            "antonyms": []
+          },
+          {
+            "partOfSpeech": "adjective",
+            "definitions": [
+              {
+                "definition": "Itinerant; travelling from place to place; done on a journey",
+                "synonyms": [],
+                "antonyms": []
+              }
+            ],
+            "synonyms": [],
+            "antonyms": []
+          }
+        ],
+        "license": {
+          "name": "CC BY-SA 3.0",
+          "url": "https://creativecommons.org/licenses/by-sa/3.0"
+        },
+        "sourceUrls": [
+          "https://en.wiktionary.org/wiki/itinerary"
+        ]
+      }
+    ],
+    "createdAt": "2026-07-16T11:21:43.737Z"
+  },
+  "kill": {
+    "source": "freedictionary",
+    "rawPayload": [
+      {
+        "word": "kill",
+        "phonetic": "/kɪl/",
+        "phonetics": [
+          {
+            "text": "/kɪl/",
+            "audio": "https://api.dictionaryapi.dev/media/pronunciations/en/kill-us.mp3",
+            "sourceUrl": "https://commons.wikimedia.org/w/index.php?curid=268482"
+          }
+        ],
+        "meanings": [
+          {
+            "partOfSpeech": "noun",
+            "definitions": [
+              {
+                "definition": "The act of killing.",
+                "synonyms": [],
+                "antonyms": [],
+                "example": "The assassin liked to make a clean kill, and thus favored small arms over explosives."
+              },
+              {
+                "definition": "Specifically, the death blow.",
+                "synonyms": [],
+                "antonyms": [],
+                "example": "The hunter delivered the kill with a pistol shot to the head."
+              },
+              {
+                "definition": "The result of killing; that which has been killed.",
+                "synonyms": [],
+                "antonyms": [],
+                "example": "The fox dragged its kill back to its den."
+              },
+              {
+                "definition": "The grounding of the ball on the opponent's court, winning the rally.",
+                "synonyms": [],
+                "antonyms": []
+              }
+            ],
+            "synonyms": [],
+            "antonyms": []
+          },
+          {
+            "partOfSpeech": "verb",
+            "definitions": [
+              {
+                "definition": "To put to death; to extinguish the life of.",
+                "synonyms": [],
+                "antonyms": [],
+                "example": "Smoking kills more people each year than alcohol and drugs combined."
+              },
+              {
+                "definition": "To render inoperative.",
+                "synonyms": [],
+                "antonyms": [],
+                "example": "He killed the engine and turned off the headlights, but remained in the car, waiting."
+              },
+              {
+                "definition": "To stop, cease or render void; to terminate.",
+                "synonyms": [],
+                "antonyms": [],
+                "example": "My computer wouldn't respond until I killed some of the running processes."
+              },
+              {
+                "definition": "To amaze, exceed, stun or otherwise incapacitate.",
+                "synonyms": [],
+                "antonyms": [],
+                "example": "That joke always kills me."
+              },
+              {
+                "definition": "To cause great pain, discomfort or distress to.",
+                "synonyms": [],
+                "antonyms": [],
+                "example": "These tight shoes are killing my feet."
+              },
+              {
+                "definition": "To produce feelings of dissatisfaction or revulsion in.",
+                "synonyms": [],
+                "antonyms": [],
+                "example": "It kills me to learn how many poor people are practically starving in this country while rich moguls spend such outrageous amounts on useless luxuries."
+              },
+              {
+                "definition": "To use up or to waste.",
+                "synonyms": [],
+                "antonyms": [],
+                "example": "He told the bartender, pointing at the bottle of scotch he planned to consume, \"Leave it, I'm going to kill the bottle.\""
+              },
+              {
+                "definition": "To exert an overwhelming effect on.",
+                "synonyms": [],
+                "antonyms": [],
+                "example": "Between the two of us, we killed the rest of the case of beer."
+              },
+              {
+                "definition": "To overpower, overwhelm or defeat.",
+                "synonyms": [],
+                "antonyms": [],
+                "example": "The team had absolutely killed their traditional rivals, and the local sports bars were raucous with celebrations."
+              },
+              {
+                "definition": "To force a company out of business.",
+                "synonyms": [],
+                "antonyms": []
+              },
+              {
+                "definition": "To produce intense pain.",
+                "synonyms": [],
+                "antonyms": [],
+                "example": "You don't ever want to get rabies. The doctor will have to give you multiple shots and they really kill."
+              },
+              {
+                "definition": "To punish severely.",
+                "synonyms": [],
+                "antonyms": [],
+                "example": "My parents are going to kill me!"
+              },
+              {
+                "definition": "To strike (a ball, etc.) with such force and placement as to make a shot that is impossible to defend against, usually winning a point.",
+                "synonyms": [],
+                "antonyms": []
+              },
+              {
+                "definition": "To cause (a ball, etc.) to be out of play, resulting in a stoppage of gameplay.",
+                "synonyms": [],
+                "antonyms": []
+              },
+              {
+                "definition": "To succeed with an audience, especially in comedy.",
+                "synonyms": [],
+                "antonyms": []
+              },
+              {
+                "definition": "To cause to assume the value zero.",
+                "synonyms": [],
+                "antonyms": []
+              },
+              {
+                "definition": "(IRC) To disconnect (a user) involuntarily from the network.",
+                "synonyms": [],
+                "antonyms": []
+              },
+              {
+                "definition": "To deadmelt.",
+                "synonyms": [],
+                "antonyms": []
+              }
+            ],
+            "synonyms": [
+              "annihilate",
+              "assassinate",
+              "bump off",
+              "dispatch",
+              "ice",
+              "knock off",
+              "liquidate",
+              "murder",
+              "rub out",
+              "slaughter",
+              "slay",
+              "top",
+              "whack",
+              "break",
+              "deactivate",
+              "disable",
+              "turn off",
+              "fritter away",
+              "while away"
+            ],
+            "antonyms": []
+          }
+        ],
+        "license": {
+          "name": "CC BY-SA 3.0",
+          "url": "https://creativecommons.org/licenses/by-sa/3.0"
+        },
+        "sourceUrls": [
+          "https://en.wiktionary.org/wiki/kill"
+        ]
+      },
+      {
+        "word": "kill",
+        "phonetic": "/kɪl/",
+        "phonetics": [
+          {
+            "text": "/kɪl/",
+            "audio": "https://api.dictionaryapi.dev/media/pronunciations/en/kill-us.mp3",
+            "sourceUrl": "https://commons.wikimedia.org/w/index.php?curid=268482"
+          }
+        ],
+        "meanings": [
+          {
+            "partOfSpeech": "noun",
+            "definitions": [
+              {
+                "definition": "(north-east US) A creek; a body of water; a channel or arm of the sea.",
+                "synonyms": [],
+                "antonyms": [],
+                "example": "Schuylkill, Catskill, etc."
+              }
+            ],
+            "synonyms": [],
+            "antonyms": []
+          }
+        ],
+        "license": {
+          "name": "CC BY-SA 3.0",
+          "url": "https://creativecommons.org/licenses/by-sa/3.0"
+        },
+        "sourceUrls": [
+          "https://en.wiktionary.org/wiki/kill"
+        ]
+      },
+      {
+        "word": "kill",
+        "phonetic": "/kɪl/",
+        "phonetics": [
+          {
+            "text": "/kɪl/",
+            "audio": "https://api.dictionaryapi.dev/media/pronunciations/en/kill-us.mp3",
+            "sourceUrl": "https://commons.wikimedia.org/w/index.php?curid=268482"
+          }
+        ],
+        "meanings": [
+          {
+            "partOfSpeech": "noun",
+            "definitions": [
+              {
+                "definition": "A kiln.",
+                "synonyms": [],
+                "antonyms": []
+              }
+            ],
+            "synonyms": [],
+            "antonyms": []
+          }
+        ],
+        "license": {
+          "name": "CC BY-SA 3.0",
+          "url": "https://creativecommons.org/licenses/by-sa/3.0"
+        },
+        "sourceUrls": [
+          "https://en.wiktionary.org/wiki/kill"
+        ]
+      }
+    ],
+    "createdAt": "2026-07-16T13:27:15.903Z"
+  }
+}

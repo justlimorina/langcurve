@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LangCurve - Material English Vocabulary Learning</title>
+  
+  <!-- Material Symbols Outlined Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+  
+  <!-- CSS Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+  
+  <!-- Import Material Web Components Library from CDN -->
+  <script type="module" src="https://esm.sh/@material/web@1.5.0/all.js"></script>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar Navigation Drawer -->
+    <aside class="sidebar">
+      <a href="#" class="brand" onclick="navigateTo('dashboard'); return false;">
+        <span class="brand-name">LangCurve</span>
+      </a>
+      
+      <nav class="sidebar-nav">
+        <div class="sidebar-nav-item active" id="nav-dashboard" onclick="navigateTo('dashboard')">
+          <span class="nav-label">Dashboard</span>
+        </div>
+        <div class="sidebar-nav-item" id="nav-dictionary" onclick="navigateTo('dictionary')">
+          <span class="nav-label">Dictionary</span>
+        </div>
+        <div class="sidebar-nav-item" id="nav-notebook" onclick="navigateTo('notebook')">
+          <span class="nav-label">Notebook</span>
+        </div>
+        <div class="sidebar-nav-item" id="nav-practice" onclick="navigateTo('practice')">
+          <span class="nav-label">Practice</span>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      
+      <!-- 1. DASHBOARD VIEW -->
+      <section id="dashboard-view" class="view-section active">
+        <!-- Hero Banner -->
+        <div class="hero-banner">
+          <h1 class="hero-title">Học từ vựng cùng LangCurve</h1>
+          <p class="hero-desc">Học từ vựng tiếng Anh theo chủ đề, tra cứu trực tiếp từ các từ điển lớn trên thế giới và rèn luyện kỹ năng nhớ từ lâu thông qua việc tự đặt câu ví dụ thực tế.</p>
+        </div>
+
+        <!-- 4 Stat Cards -->
+        <div class="stat-cards-grid">
+          <div class="stat-card">
+            <h3 class="stat-card-title">Điểm kinh nghiệm</h3>
+            <div class="stat-card-value">
+              <span class="stat-number" id="dash-total-xp">0</span>
+              <span class="stat-unit">XP</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <h3 class="stat-card-title">Số lượng từ đã học</h3>
+            <div class="stat-card-value">
+              <span class="stat-number" id="dash-total-words">0</span>
+              <span class="stat-unit">từ vựng</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <h3 class="stat-card-title">Số ví dụ đã viết</h3>
+            <div class="stat-card-value">
+              <span class="stat-number" id="dash-total-examples">0</span>
+              <span class="stat-unit">câu ví dụ</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <h3 class="stat-card-title">Từ vựng nổi bật</h3>
+            <div class="stat-card-value" id="dash-featured-words">
+              <!-- Loaded dynamically -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Video Section -->
+        <div class="video-section">
+          <h3 class="video-section-title">Video học tập</h3>
+          <div class="video-placeholder" id="dash-video-area">
+            <span class="material-symbols-outlined" style="font-size: 48px; opacity: 0.6;">play_circle</span>
+            <p>Video hướng dẫn sẽ được cập nhật tại đây</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. DICTIONARY VIEW -->
+      <section id="dictionary-view" class="view-section">
+        <!-- Search Bar -->
+        <div class="dict-search-bar">
+          <div class="dict-search-input-wrap">
+            <md-outlined-text-field id="dict-search-input" label="Tìm kiếm từ vựng hoặc chủ đề" placeholder="Tìm kiếm từ vựng..." onkeydown="handleSearchKeydown(event)">
+            </md-outlined-text-field>
+          </div>
+          <md-filled-button class="dict-search-btn" onclick="searchDictionary()">
+            Tìm kiếm
+          </md-filled-button>
+        </div>
+
+        <!-- Loading -->
+        <div id="search-loading" style="display: none;">
+          <div class="spinner"></div>
+          <p style="text-align: center; color: var(--md-sys-color-on-surface-variant);">Đang truy vấn từ điển trực tuyến...</p>
+        </div>
+
+        <!-- Error -->
+        <div id="search-error" class="empty-state" style="display: none;">
+          <span class="empty-icon">error</span>
+          <h3 id="search-error-title">Không tìm thấy từ vựng</h3>
+          <p id="search-error-desc">Vui lòng kiểm tra lại chính tả hoặc thử với từ khác.</p>
+        </div>
+
+        <!-- Result Area -->
+        <div id="search-result-area" style="display: none;">
+          <!-- Loaded dynamically by app.js -->
+        </div>
+      </section>
+
+      <!-- 3. NOTEBOOK VIEW -->
+      <section id="notebook-view" class="view-section">
+        <div class="page-header">
+          <div>
+            <h2 class="page-title">Notebook</h2>
+            <p class="page-subtitle">Quản lý các chủ đề và từ vựng đã lưu của bạn.</p>
+          </div>
+          <md-filled-button onclick="openModal('add-topic-modal')">
+            <span slot="icon" class="material-symbols-outlined">add</span>
+            Tạo chủ đề mới
+          </md-filled-button>
+        </div>
+
+        <div id="notebook-grid-container" class="topic-grid">
+          <!-- Topics loaded dynamically -->
+        </div>
+      </section>
+
+      <!-- 3b. TOPIC DETAILS SUB-VIEW (inside notebook) -->
+      <section id="topic-details-view" class="view-section">
+        <div class="back-btn-container">
+          <button class="back-btn" onclick="navigateTo('notebook')">
+            <span class="material-symbols-outlined">arrow_back</span>
+            Quay lại Notebook
+          </button>
+        </div>
+
+        <div class="topic-banner" id="topic-banner-content">
+          <!-- Loaded dynamically -->
+        </div>
+
+        <div class="section-title-container" style="margin-top: 1.5rem;">
+          <h2 class="section-title">Danh sách từ vựng</h2>
+          <md-filled-button id="btn-add-word-shortcut">
+            <span slot="icon" class="material-symbols-outlined">add</span>
+            Thêm từ mới
+          </md-filled-button>
+        </div>
+
+        <div id="vocab-grid-container" class="vocab-grid">
+          <!-- Vocab cards load here -->
+        </div>
+      </section>
+
+      <!-- 4. PRACTICE VIEW -->
+      <section id="practice-view" class="view-section">
+        <div class="page-header">
+          <div>
+            <h2 class="page-title">Ôn tập cùng LangCurve</h2>
+            <p class="page-subtitle">Đoán từ qua định nghĩa chính thức và câu ví dụ để ghi nhớ tốt nhất.</p>
+          </div>
+        </div>
+
+        <div id="practice-container">
+          <!-- Loaded dynamically -->
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- MATERIAL DIALOG MODALS -->
+
+  <!-- Modal 1: Add Topic -->
+  <md-dialog id="add-topic-modal">
+    <div slot="headline">Tạo chủ đề học mới</div>
+    <form slot="content" id="add-topic-form" onsubmit="handleCreateTopic(event)" class="dialog-content-layout">
+      <md-outlined-text-field id="topic-name" label="Tên chủ đề *" placeholder="Ví dụ: Công nghệ thông tin, Đời sống..." required autofocus></md-outlined-text-field>
+      <md-outlined-text-field id="topic-desc" type="textarea" label="Mô tả chủ đề" placeholder="Mô tả ngắn gọn về chủ đề này..." rows="3"></md-outlined-text-field>
+    </form>
+    <div slot="actions">
+      <md-text-button onclick="closeModal('add-topic-modal')">Hủy</md-text-button>
+      <md-filled-button onclick="document.getElementById('add-topic-form').requestSubmit()">Tạo chủ đề</md-filled-button>
+    </div>
+  </md-dialog>
+
+  <!-- Modal 2: Edit/Add Example Sentence -->
+  <md-dialog id="edit-example-modal">
+    <div slot="headline">Ví dụ của bạn</div>
+    <form slot="content" id="edit-example-form" onsubmit="handleSaveExample(event)" class="dialog-content-layout">
+      <input type="hidden" id="edit-example-vocab-id">
+      <input type="hidden" id="edit-example-vocab-word">
+      
+      <div style="font-size: 1.1rem; color: var(--md-sys-color-primary); font-weight: 500;">
+        Đặt câu chứa từ: <strong id="edit-example-word-display" style="font-size: 1.25rem; font-weight: 700; border-bottom: 2px solid;">word</strong>
+      </div>
+      
+      <div>
+        <md-outlined-text-field id="edit-example-input" type="textarea" label="Viết câu ví dụ tiếng Anh của bạn *" rows="3" required
+                              placeholder="Nhập câu tiếng Anh có chứa từ vựng trên..."
+                              oninput="validateExampleSentence('edit-example-input', 'edit-example-vocab-word', 'edit-example-validation')"></md-outlined-text-field>
+        
+        <!-- Live validation message -->
+        <div id="edit-example-validation" class="validation-notice"></div>
+      </div>
+    </form>
+    <div slot="actions">
+      <md-text-button onclick="closeModal('edit-example-modal')">Hủy</md-text-button>
+      <md-filled-button onclick="document.getElementById('edit-example-form').requestSubmit()">Lưu câu ví dụ</md-filled-button>
+    </div>
+  </md-dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,48 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        Int        @id @default(autoincrement())
+  email     String     @unique
+  password  String
+  xp        Int        @default(0)
+  role      Role       @default(USER)
+  progress  Progress[]
+  createdAt DateTime   @default(now())
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model Topic {
+  id          Int        @id @default(autoincrement())
+  name        String     @unique
+  description String?
+  progress    Progress[]
+}
+
+model Progress {
+  id           Int      @id @default(autoincrement())
+  userId       Int
+  topicId      Int
+  word         String
+  userExample  String?
+  easiness     Float    @default(2.5) // EF in SM-2
+  interval     Int      @default(0)   // interval in days
+  repetitions  Int      @default(0)   // consecutive correct
+  dueDate      DateTime @default(now())
+  correctCount Int      @default(0)
+  wrongCount   Int      @default(0)
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topic        Topic    @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, word])
+}
