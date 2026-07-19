@@ -59,15 +59,15 @@ export class SrsService {
   /**
    * Updates user's vocabulary progress inside PostgreSQL database
    */
-  public async recordReview(userId: number, word: string, quality: number): Promise<any> {
+  public async recordReview(userId: number, word: string, quality: number, topicId: number = 1): Promise<any> {
     if (dbMode === 'DEVELOPMENT_FALLBACK') {
-      return await dbAdapter.recordSrsReview(word, quality);
+      return await dbAdapter.recordSrsReview(word, quality, topicId);
     }
 
-    // Find or create progress record for user & word
+    // Find or create progress record for user, topic & word
     let progress = await prisma.progress.findUnique({
       where: {
-        userId_word: { userId, word }
+        userId_topicId_word: { userId, topicId, word }
       }
     });
 
@@ -82,7 +82,7 @@ export class SrsService {
     // Save back to PostgreSQL
     const updatedProgress = await prisma.progress.upsert({
       where: {
-        userId_word: { userId, word }
+        userId_topicId_word: { userId, topicId, word }
       },
       update: {
         easiness: sm2Result.easiness,
@@ -98,7 +98,7 @@ export class SrsService {
       },
       create: {
         userId,
-        topicId: progress?.topicId ?? 1, // defaults to topic 1 if creating new progress independently
+        topicId,
         word,
         easiness: sm2Result.easiness,
         repetitions: sm2Result.repetitions,

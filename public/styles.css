@@ -886,6 +886,11 @@ md-dialog {
   color: #e65100;
 }
 
+.validation-notice.info {
+  background-color: #e3f2fd;
+  color: #1565c0;
+}
+
 .validation-notice .icon {
   font-family: 'Material Symbols Outlined';
   font-size: 18px;

@@ -870,14 +870,102 @@ function validatePracticeSentence() {
   }
 }
 
-async function submitPracticeSentence() {
+async function checkGrammar(text) {
+  try {
+    const response = await fetch('https://api.languagetool.org/v2/check', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: new URLSearchParams({
+        text: text,
+        language: 'en-US'
+      })
+    });
+    if (response.ok) {
+      const data = await response.json();
+      return data.matches;
+    }
+  } catch (error) {
+    console.error('Lỗi khi kiểm tra ngữ pháp:', error);
+  }
+  return [];
+}
+
+function focusSentenceInput() {
+  const textarea = document.getElementById('practice-sentence-input');
+  if (textarea) {
+    textarea.disabled = false;
+    textarea.focus();
+  }
+  validatePracticeSentence();
+  const actionsRow = document.getElementById('practice-actions-row');
+  if (actionsRow) actionsRow.style.display = 'flex';
+}
+
+async function saveSentenceWithGrammarWarn() {
+  const textarea = document.getElementById('practice-sentence-input');
+  if (!textarea) return;
+  const sentence = textarea.value.trim();
+  await executeSavePracticeSentence(sentence);
+}
+
+async function executeSavePracticeSentence(sentence) {
   const textarea = document.getElementById('practice-sentence-input');
   const validationDiv = document.getElementById('practice-sentence-validation');
   const feedbackDiv = document.getElementById('practice-feedback');
   const feedbackMsg = document.getElementById('feedback-message');
   const actionsRow = document.getElementById('practice-actions-row');
+  const v = state.studyWords[state.studyIndex];
+  
+  if (textarea) textarea.disabled = true;
+  if (actionsRow) actionsRow.style.display = 'none';
+  if (validationDiv) validationDiv.style.display = 'none';
+  
+  try {
+    const saveRes = await fetch(`/api/vocabularies/${v.id}/example`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_example: sentence })
+    });
 
-  if (!textarea || !feedbackDiv || !feedbackMsg || !actionsRow) return;
+    if (!saveRes.ok) throw new Error('Không thể lưu câu ví dụ mới vào Notebook');
+
+    v.user_example = sentence;
+
+    const srsRes = await fetch('/api/srs/review', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ word: v.word, quality: 5, topic_id: v.topic_id })
+    });
+    
+    if (!srsRes.ok) throw new Error('Không thể cập nhật tiến trình SRS');
+
+    feedbackMsg.innerHTML = `
+      <div style="background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); padding: 16px; border-radius: var(--radius-md); border-left: 4px solid var(--md-sys-color-primary);">
+        <h4 style="margin:0 0 6px 0; font-family:var(--font-display); font-size:1.1rem; display:flex; align-items:center; gap:8px;">
+          <span class="material-symbols-outlined" style="font-size:24px;">stars</span>
+          Thành công! +20 XP
+        </h4>
+        <p style="margin:0; font-size:0.95rem;">Định mức ôn tập đã được tự động dãn cách thông qua thuật toán SM-2. Câu ví dụ của bạn đã được cập nhật vào Notebook.</p>
+      </div>
+    `;
+    feedbackDiv.style.display = 'block';
+
+    updateStats();
+  } catch (error) {
+    alert(error.message);
+    if (textarea) textarea.disabled = false;
+    if (actionsRow) actionsRow.style.display = 'flex';
+  }
+}
+
+async function submitPracticeSentence() {
+  const textarea = document.getElementById('practice-sentence-input');
+  const validationDiv = document.getElementById('practice-sentence-validation');
+  const actionsRow = document.getElementById('practice-actions-row');
+
+  if (!textarea || !validationDiv || !actionsRow) return;
 
   const v = state.studyWords[state.studyIndex];
   const sentence = textarea.value.trim();
@@ -900,49 +988,47 @@ async function submitPracticeSentence() {
     return;
   }
 
-  // Disable inputs and actions
   textarea.disabled = true;
   actionsRow.style.display = 'none';
-  if (validationDiv) validationDiv.style.display = 'none';
 
-  try {
-    // 1. Save new sentence as user_example in database
-    const saveRes = await fetch(`/api/vocabularies/${v.id}/example`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user_example: sentence })
-    });
+  validationDiv.style.display = 'flex';
+  validationDiv.className = 'validation-notice info';
+  validationDiv.innerHTML = `
+    <span class="spinner-small" style="border: 2px solid rgba(0,0,0,0.1); border-top-color: var(--md-sys-color-primary); width:14px; height:14px; margin-right:4px;"></span>
+    <span>Đang phân tích cấu trúc & kiểm tra ngữ pháp câu...</span>
+  `;
 
-    if (!saveRes.ok) throw new Error('Không thể lưu câu ví dụ mới vào Notebook');
+  const grammarMatches = await checkGrammar(sentence);
 
-    // Update locally stored copy
-    v.user_example = sentence;
+  if (grammarMatches && grammarMatches.length > 0) {
+    let errorsHtml = grammarMatches.map(m => {
+      const badText = sentence.substring(m.offset, m.offset + m.length);
+      const replacements = m.replacements.slice(0, 3).map(r => `<strong style="color:var(--md-sys-color-primary);">${escapeHtml(r.value)}</strong>`).join(', ');
+      return `
+        <div style="margin-bottom:8px; font-size:0.85rem; border-left:3px solid var(--md-sys-color-error); padding-left:8px;">
+          <div>Lỗi tại: "<span style="text-decoration:line-through; color:var(--md-sys-color-error); font-weight:600;">${escapeHtml(badText)}</span>" &rarr; Gợi ý sửa: ${replacements || 'không có'}</div>
+          <div style="color:var(--md-sys-color-on-surface-variant); font-size:0.8rem; margin-top:2px;">${escapeHtml(m.message)}</div>
+        </div>
+      `;
+    }).join('');
 
-    // 2. Submit SRS rating with quality = 5 (successful composition)
-    const srsRes = await fetch('/api/srs/review', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ word: v.word, quality: 5 })
-    });
-    
-    if (!srsRes.ok) throw new Error('Không thể cập nhật tiến trình SRS');
-
-    feedbackMsg.innerHTML = `
-      <div style="background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); padding: 16px; border-radius: var(--radius-md); border-left: 4px solid var(--md-sys-color-primary);">
-        <h4 style="margin:0 0 6px 0; font-family:var(--font-display); font-size:1.1rem; display:flex; align-items:center; gap:8px;">
-          <span class="material-symbols-outlined" style="font-size:24px;">stars</span>
-          Thành công! +20 XP
-        </h4>
-        <p style="margin:0; font-size:0.95rem;">Định mức ôn tập đã được tự động dãn cách thông qua thuật toán SM-2. Câu ví dụ của bạn đã được cập nhật vào Notebook.</p>
+    validationDiv.className = 'validation-notice invalid';
+    validationDiv.style.display = 'flex';
+    validationDiv.innerHTML = `
+      <div style="display:flex; flex-direction:column; gap:6px; text-align:left; width:100%; padding: 4px 0;">
+        <div style="font-weight:600; display:flex; align-items:center; gap:4px; color:#e65100;">
+          <span class="material-symbols-outlined" style="font-size:18px;">warning</span>
+          Phát hiện một số lỗi cấu trúc hoặc ngữ pháp:
+        </div>
+        <div style="margin-top:4px;">${errorsHtml}</div>
+        <div style="margin-top:10px; display:flex; gap:12px;">
+          <md-filled-button onclick="saveSentenceWithGrammarWarn()" style="--md-filled-button-container-color: var(--md-sys-color-tertiary);">Vẫn lưu câu này</md-filled-button>
+          <md-outlined-button onclick="focusSentenceInput()">Sửa lại câu</md-outlined-button>
+        </div>
       </div>
     `;
-    feedbackDiv.style.display = 'block';
-
-    updateStats();
-  } catch (error) {
-    alert(error.message);
-    textarea.disabled = false;
-    actionsRow.style.display = 'flex';
+  } else {
+    await executeSavePracticeSentence(sentence);
   }
 }
 
@@ -966,7 +1052,7 @@ async function skipPracticeWord() {
     await fetch('/api/srs/review', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ word: v.word, quality: 1 })
+      body: JSON.stringify({ word: v.word, quality: 1, topic_id: v.topic_id })
     });
 
     feedbackMsg.innerHTML = `

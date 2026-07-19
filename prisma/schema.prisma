@@ -34,6 +34,10 @@ model Progress {
   userId       Int
   topicId      Int
   word         String
+  definition   String   @default("")
+  partOfSpeech String   @default("")
+  phonetic     String?
+  audioUrl     String?
   userExample  String?
   easiness     Float    @default(2.5) // EF in SM-2
   interval     Int      @default(0)   // interval in days
@@ -44,5 +48,5 @@ model Progress {
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   topic        Topic    @relation(fields: [topicId], references: [id], onDelete: Cascade)
   
-  @@unique([userId, word])
+  @@unique([userId, topicId, word])
 }

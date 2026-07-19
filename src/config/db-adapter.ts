@@ -24,10 +24,18 @@ export interface IDbAdapter {
   getTopics(): Promise<any[]>;
   createTopic(name: string, description?: string): Promise<any>;
   getVocabularies(topicId: number): Promise<any[]>;
-  upsertVocabulary(topicId: number, word: string, userExample?: string): Promise<any>;
+  upsertVocabulary(
+    topicId: number, 
+    word: string, 
+    userExample?: string, 
+    definition?: string, 
+    partOfSpeech?: string, 
+    phonetic?: string, 
+    audioUrl?: string
+  ): Promise<any>;
   updateExample(vocabId: number, userExample?: string): Promise<any>;
   deleteVocabulary(vocabId: number): Promise<any>;
-  recordSrsReview(word: string, quality: number): Promise<any>;
+  recordSrsReview(word: string, quality: number, topicId?: number): Promise<any>;
   getLearningCurve(): Promise<any[]>;
 }
 
@@ -135,7 +143,11 @@ class DbAdapter implements IDbAdapter {
     if (dbMode === 'PRODUCTION') {
       try {
         const totalTopics = await prisma.topic.count();
-        const totalWords = await prisma.progress.count();
+        const distinctWordsResult = await prisma.progress.findMany({
+          select: { word: true },
+          distinct: ['word']
+        });
+        const totalWords = distinctWordsResult.length;
         const totalExamples = await prisma.progress.count({
           where: { userExample: { not: null } }
         });
@@ -146,12 +158,13 @@ class DbAdapter implements IDbAdapter {
       }
     }
     const topics = await sqliteDb!.all('SELECT id FROM topics');
+    const distinctVocabsRow = await sqliteDb!.get('SELECT COUNT(DISTINCT word) as count FROM vocabularies');
     const vocabs = await sqliteDb!.all('SELECT id, user_example FROM vocabularies');
     const userRow = await sqliteDb!.get('SELECT xp FROM users WHERE id = 1');
     const examplesCount = vocabs.filter((v: any) => v.user_example && v.user_example.trim() !== '').length;
     return {
       total_topics: topics.length,
-      total_words: vocabs.length,
+      total_words: distinctVocabsRow?.count || 0,
       total_examples: examplesCount,
       xp: userRow?.xp || 0
     };
@@ -209,6 +222,10 @@ class DbAdapter implements IDbAdapter {
       id: r.id,
       topicId: r.topic_id,
       word: r.word,
+      definition: r.definition || '',
+      partOfSpeech: r.part_of_speech || '',
+      phonetic: r.phonetic || null,
+      audioUrl: r.audio_url || null,
       userExample: r.user_example,
       easiness: r.easiness || 2.5,
       interval: r.interval || 0,
@@ -217,29 +234,68 @@ class DbAdapter implements IDbAdapter {
     }));
   }
 
-  async upsertVocabulary(topicId: number, word: string, userExample?: string): Promise<any> {
+  async upsertVocabulary(
+    topicId: number, 
+    word: string, 
+    userExample?: string,
+    definition?: string,
+    partOfSpeech?: string,
+    phonetic?: string,
+    audioUrl?: string
+  ): Promise<any> {
     if (dbMode === 'PRODUCTION') {
       try {
         return await prisma.progress.upsert({
-          where: { userId_word: { userId: 1, word: word.trim().toLowerCase() } },
-          update: { topicId, userExample: userExample ? userExample.trim() : undefined },
-          create: { userId: 1, topicId, word: word.trim().toLowerCase(), userExample: userExample ? userExample.trim() : null }
+          where: { userId_topicId_word: { userId: 1, topicId, word: word.trim().toLowerCase() } },
+          update: { 
+            userExample: userExample ? userExample.trim() : undefined,
+            definition: definition ? definition.trim() : undefined,
+            partOfSpeech: partOfSpeech ? partOfSpeech.trim() : undefined,
+            phonetic: phonetic || undefined,
+            audioUrl: audioUrl || undefined
+          },
+          create: { 
+            userId: 1, 
+            topicId, 
+            word: word.trim().toLowerCase(), 
+            userExample: userExample ? userExample.trim() : null,
+            definition: definition ? definition.trim() : '',
+            partOfSpeech: partOfSpeech ? partOfSpeech.trim() : '',
+            phonetic: phonetic || null,
+            audioUrl: audioUrl || null
+          }
         });
       } catch (e) {
         this.fallbackToDevMode();
       }
     }
-    const existing = await sqliteDb!.get('SELECT id FROM vocabularies WHERE word = ?', [word.trim().toLowerCase()]);
+    const existing = await sqliteDb!.get('SELECT id FROM vocabularies WHERE topic_id = ? AND word = ?', [topicId, word.trim().toLowerCase()]);
     if (existing) {
       await sqliteDb!.run(
-        'UPDATE vocabularies SET topic_id = ?, user_example = ? WHERE id = ?',
-        [topicId, userExample ? userExample.trim() : null, existing.id]
+        'UPDATE vocabularies SET user_example = ?, definition = ?, part_of_speech = ?, phonetic = ?, audio_url = ? WHERE id = ?',
+        [
+          userExample ? userExample.trim() : null,
+          definition ? definition.trim() : '',
+          partOfSpeech ? partOfSpeech.trim() : '',
+          phonetic || null,
+          audioUrl || null,
+          existing.id
+        ]
       );
       return { id: existing.id, topicId, word: word.trim().toLowerCase(), userExample };
     } else {
       const res = await sqliteDb!.run(
-        'INSERT INTO vocabularies (topic_id, word, user_example, easiness, interval, repetitions, due_date) VALUES (?, ?, ?, 2.5, 0, 0, ?)',
-        [topicId, word.trim().toLowerCase(), userExample ? userExample.trim() : null, new Date().toISOString()]
+        'INSERT INTO vocabularies (topic_id, word, user_example, definition, part_of_speech, phonetic, audio_url, easiness, interval, repetitions, due_date) VALUES (?, ?, ?, ?, ?, ?, ?, 2.5, 0, 0, ?)',
+        [
+          topicId, 
+          word.trim().toLowerCase(), 
+          userExample ? userExample.trim() : null, 
+          definition ? definition.trim() : '',
+          partOfSpeech ? partOfSpeech.trim() : '',
+          phonetic || null,
+          audioUrl || null,
+          new Date().toISOString()
+        ]
       );
       return { id: res.lastID, topicId, word: word.trim().toLowerCase(), userExample };
     }
@@ -274,7 +330,7 @@ class DbAdapter implements IDbAdapter {
     return { message: 'Deleted' };
   }
 
-  async recordSrsReview(word: string, quality: number): Promise<any> {
+  async recordSrsReview(word: string, quality: number, topicId?: number): Promise<any> {
     if (dbMode === 'PRODUCTION') {
       try {
         // Handled in SrsService using Prisma directly
@@ -284,7 +340,11 @@ class DbAdapter implements IDbAdapter {
       }
     }
 
-    const row = await sqliteDb!.get('SELECT * FROM vocabularies WHERE word = ?', [word.trim().toLowerCase()]);
+    const query = topicId 
+      ? 'SELECT * FROM vocabularies WHERE word = ? AND topic_id = ?' 
+      : 'SELECT * FROM vocabularies WHERE word = ?';
+    const params = topicId ? [word.trim().toLowerCase(), topicId] : [word.trim().toLowerCase()];
+    const row = await sqliteDb!.get(query, params);
     const currentEF = row?.easiness || 2.5;
     const currentRepetitions = row?.repetitions || 0;
     const currentInterval = row?.interval || 0;
@@ -381,12 +441,17 @@ export async function initializeSqliteFallback() {
     CREATE TABLE IF NOT EXISTS vocabularies (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       topic_id INTEGER,
-      word TEXT UNIQUE,
+      word TEXT,
+      definition TEXT DEFAULT '',
+      part_of_speech TEXT DEFAULT '',
+      phonetic TEXT,
+      audio_url TEXT,
       user_example TEXT,
       easiness REAL DEFAULT 2.5,
       interval INTEGER DEFAULT 0,
       repetitions INTEGER DEFAULT 0,
-      due_date TEXT
+      due_date TEXT,
+      UNIQUE(topic_id, word)
     );
     CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -394,37 +459,37 @@ export async function initializeSqliteFallback() {
     );
   `);
 
-  // Schema check & upgrade for existing databases from mockup session
+  // Schema check & upgrade for existing databases
   try {
     const tableInfo = await sqliteDb.all("PRAGMA table_info(vocabularies)");
     const hasDefinition = tableInfo.some((col: any) => col.name === 'definition');
-    if (hasDefinition) {
-      // Recreate table if old mockup version with definition NOT NULL constraint exists
+    if (!hasDefinition) {
+      console.log('Migrating SQLite database schema to support per-topic definitions and unique constraints...');
       await sqliteDb.exec(`
-        DROP TABLE IF EXISTS vocabularies;
+        ALTER TABLE vocabularies RENAME TO vocabularies_old;
+        
         CREATE TABLE vocabularies (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           topic_id INTEGER,
-          word TEXT UNIQUE,
+          word TEXT,
+          definition TEXT DEFAULT '',
+          part_of_speech TEXT DEFAULT '',
+          phonetic TEXT,
+          audio_url TEXT,
           user_example TEXT,
           easiness REAL DEFAULT 2.5,
           interval INTEGER DEFAULT 0,
           repetitions INTEGER DEFAULT 0,
-          due_date TEXT
+          due_date TEXT,
+          UNIQUE(topic_id, word)
         );
+        
+        INSERT INTO vocabularies (id, topic_id, word, user_example, easiness, interval, repetitions, due_date, definition, part_of_speech, phonetic, audio_url)
+        SELECT id, topic_id, word, user_example, easiness, interval, repetitions, due_date, '', '', '', '' FROM vocabularies_old;
+        
+        DROP TABLE vocabularies_old;
       `);
-      console.log('Migrated old SQLite vocabularies table to new schema (removed NOT NULL definition).');
-    } else {
-      const hasDueDate = tableInfo.some((col: any) => col.name === 'due_date');
-      if (!hasDueDate) {
-        await sqliteDb.exec(`
-          ALTER TABLE vocabularies ADD COLUMN easiness REAL DEFAULT 2.5;
-          ALTER TABLE vocabularies ADD COLUMN interval INTEGER DEFAULT 0;
-          ALTER TABLE vocabularies ADD COLUMN repetitions INTEGER DEFAULT 0;
-          ALTER TABLE vocabularies ADD COLUMN due_date TEXT;
-        `);
-        console.log('Upgraded existing SQLite database with SRS scheduling columns.');
-      }
+      console.log('SQLite database schema migration completed successfully.');
     }
   } catch (e) {
     console.error('Failed to verify or upgrade SQLite schema:', e);

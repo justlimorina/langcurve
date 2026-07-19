@@ -96,24 +96,30 @@ app.get('/api/topics/:id/vocabularies', async (req: Request, res: Response) => {
 
     const vocabularies = await dbAdapter.getVocabularies(topicId);
 
-    // In this production schema, we fetch definitions from MongoDB to enrich progress data
+    // Prioritize definition fields from database; perform online fallback only if empty
     const enrichedVocabularies = await Promise.all(
       vocabularies.map(async (v) => {
-        const dictInfo = await dictionaryService.lookupWord(v.word);
-        // Find phonetic & definition from raw payload
-        let phonetic = '';
-        let definition = 'No definition available.';
-        let partOfSpeech = '';
-        let audioUrl = '';
+        let phonetic = v.phonetic || '';
+        let definition = v.definition || 'No definition available.';
+        let partOfSpeech = v.partOfSpeech || '';
+        let audioUrl = v.audioUrl || '';
 
-        if (dictInfo && dictInfo[0]) {
-          const entry = dictInfo[0];
-          phonetic = entry.phonetic || '';
-          partOfSpeech = entry.meanings?.[0]?.partOfSpeech || '';
-          definition = entry.meanings?.[0]?.definitions?.[0]?.definition || definition;
-          
-          const audioEntry = entry.phonetics?.find((p: any) => p.audio && p.audio !== '');
-          if (audioEntry) audioUrl = audioEntry.audio;
+        // Fallback for old database rows lacking stored definition fields
+        if (!v.definition || v.definition.trim() === '') {
+          try {
+            const dictInfo = await dictionaryService.lookupWord(v.word);
+            if (dictInfo && dictInfo[0]) {
+              const entry = dictInfo[0];
+              phonetic = entry.phonetic || '';
+              partOfSpeech = entry.meanings?.[0]?.partOfSpeech || '';
+              definition = entry.meanings?.[0]?.definitions?.[0]?.definition || 'No definition available.';
+              
+              const audioEntry = entry.phonetics?.find((p: any) => p.audio && p.audio !== '');
+              if (audioEntry) audioUrl = audioEntry.audio;
+            }
+          } catch (err) {
+            console.warn(`Failed to fetch online fallback definition for "${v.word}":`, err);
+          }
         }
 
         return {
@@ -156,14 +162,22 @@ app.get('/api/dictionary/lookup', async (req: Request, res: Response) => {
 
 // 6. Save imported word to database
 app.post('/api/vocabularies', async (req: Request, res: Response) => {
-  const { topic_id, word, user_example } = req.body;
+  const { topic_id, word, user_example, definition, part_of_speech, phonetic, audio_url } = req.body;
   if (!topic_id || !word) {
     return res.status(400).json({ error: 'topic_id and word are required fields.' });
   }
 
   try {
     const topicId = parseInt(topic_id);
-    const progress = await dbAdapter.upsertVocabulary(topicId, word, user_example);
+    const progress = await dbAdapter.upsertVocabulary(
+      topicId, 
+      word, 
+      user_example, 
+      definition, 
+      part_of_speech, 
+      phonetic, 
+      audio_url
+    );
     res.status(201).json(progress);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
@@ -172,7 +186,7 @@ app.post('/api/vocabularies', async (req: Request, res: Response) => {
 
 // 7. Record Spaced Repetition (SRS) Quality review feedback
 app.post('/api/srs/review', async (req: Request, res: Response) => {
-  const { word, quality } = req.body;
+  const { word, quality, topic_id } = req.body;
   if (!word || quality === undefined) {
     return res.status(400).json({ error: 'word and quality rating (0-5) are required.' });
   }
@@ -183,7 +197,8 @@ app.post('/api/srs/review', async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Quality score must be an integer between 0 and 5.' });
     }
 
-    const progress = await srsService.recordReview(1, word.trim().toLowerCase(), rating);
+    const topicId = topic_id ? parseInt(topic_id) : 1;
+    const progress = await srsService.recordReview(1, word.trim().toLowerCase(), rating, topicId);
     res.json(progress);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
