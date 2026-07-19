@@ -12,7 +12,9 @@ const state = {
   // Practice state
   studyWords: [],
   studyIndex: 0,
-  studyFlipped: false
+  studyFlipped: false,
+  practiceTopicId: null,
+  practiceTopicName: ''
 };
 
 // Initialize Application
@@ -252,6 +254,9 @@ function renderDictionaryResults(apiData) {
         <div class="def-card">
           <h4 class="def-card-pos">{${escapeHtml(meaning.partOfSpeech)}}</h4>
           <p class="def-card-meaning">${escapeHtml(def.definition)}</p>
+          <div class="def-card-meaning-vi" id="def-vi-${idx}" style="font-size:0.85rem; color:var(--primary-tint-80); margin:6px 0; font-style:italic; opacity:0.95; display:flex; align-items:center; gap:6px;">
+            <span class="spinner-small"></span> Đang dịch...
+          </div>
           ${exampleHtml}
           <button class="def-card-save" onclick="openSaveDefDialog(${idx})">Save</button>
         </div>
@@ -280,16 +285,50 @@ function renderDictionaryResults(apiData) {
       </div>
     </div>
 
+    ${viBlock}
+
     <div class="def-cards-grid">
       ${defCardsHtml}
     </div>
-
-    ${viBlock}
   `;
 
   // Attempt to fetch Vietnamese meaning from MyMemory translate API
   fetchVietnameseMeaning(word);
+
+  // Trigger stagger background translation for definitions
+  entry.meanings.forEach(meaning => {
+    meaning.definitions.forEach(def => {
+      const idx = state.dictionaryResult.definitions.findIndex(
+        d => d.part_of_speech === meaning.partOfSpeech && d.definition === def.definition
+      );
+      if (idx !== -1) {
+        setTimeout(() => {
+          translateDefinition(def.definition, `def-vi-${idx}`);
+        }, idx * 150);
+      }
+    });
+  });
 }
+
+async function translateDefinition(text, elementId) {
+  const el = document.getElementById(elementId);
+  if (!el) return;
+
+  try {
+    const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|vi`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.responseData && data.responseData.translatedText) {
+        el.innerHTML = `<span class="material-symbols-outlined" style="font-size:14px; vertical-align:middle; margin-right:4px;">translate</span>${escapeHtml(data.responseData.translatedText)}`;
+        return;
+      }
+    }
+    el.textContent = '(Không thể dịch tự động)';
+  } catch (e) {
+    el.textContent = '(Lỗi dịch)';
+  }
+}
+
 
 async function fetchVietnameseMeaning(word) {
   const el = document.getElementById('dict-vi-meaning');
@@ -591,20 +630,73 @@ async function deleteVocabulary(id) {
 // ============================================
 async function initPracticeView() {
   const container = document.getElementById('practice-container');
+  
+  if (state.practiceTopicId === null) {
+    container.innerHTML = '<div class="spinner"></div>';
+    try {
+      const topicsRes = await fetch('/api/topics');
+      if (!topicsRes.ok) throw new Error('Không thể tải dữ liệu chủ đề');
+      const topics = await topicsRes.json();
+      
+      let html = `
+        <div class="practice-selector-container" style="animation: fadeIn 0.25s ease;">
+          <h3 style="font-family: var(--font-display); font-size: 1.3rem; font-weight: 700; margin: 0 0 8px 0; color: var(--md-sys-color-primary);">Chọn chủ đề để ôn tập</h3>
+          <p style="font-size: 0.9rem; color: var(--md-sys-color-on-surface-variant); margin: 0 0 24px 0;">Ôn tập từ vựng tập trung theo từng chủ đề giúp nâng cao hiệu quả học tập và ghi nhớ lâu hơn.</p>
+          
+          <div class="practice-topics-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px;">
+            <div class="practice-topic-card" onclick="selectPracticeTopic('all', 'Tất cả chủ đề')" style="background-color: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); border: 1px solid var(--md-sys-color-outline-variant); border-radius: var(--radius-md); padding: 20px; cursor: pointer; display: flex; flex-direction: column; gap: 8px;">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span class="topic-badge" style="background-color: var(--md-sys-color-primary); color: #fff;">Học hỗn hợp</span>
+              </div>
+              <h3 style="font-family: var(--font-display); font-size: 1.15rem; font-weight: 700; margin: 4px 0 0 0;">Tất cả chủ đề</h3>
+              <p style="font-size: 0.85rem; margin: 0; line-height: 1.4; flex: 1; opacity: 0.9;">Ôn tập tất cả từ vựng đang có của bạn từ tất cả các chủ đề trộn lẫn.</p>
+            </div>
+      `;
+      
+      topics.forEach(t => {
+        html += `
+            <div class="practice-topic-card" onclick="selectPracticeTopic(${t.id}, '${escapeJsString(t.name)}')" style="background-color: var(--md-sys-color-surface-container-lowest); border: 1px solid var(--md-sys-color-outline-variant); border-radius: var(--radius-md); padding: 20px; cursor: pointer; display: flex; flex-direction: column; gap: 8px;">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span class="topic-badge">Chủ đề</span>
+                <span class="word-count-badge" style="font-size:0.8rem; color: var(--md-sys-color-on-surface-variant);"><span class="material-symbols-outlined" style="font-size: 16px; vertical-align:middle; margin-right:4px;">menu_book</span>${t.word_count} từ</span>
+              </div>
+              <h3 style="font-family: var(--font-display); font-size: 1.15rem; font-weight: 700; margin: 4px 0 0 0; color: var(--md-sys-color-on-surface);">${escapeHtml(t.name)}</h3>
+              <p style="font-size: 0.85rem; color: var(--md-sys-color-on-surface-variant); margin: 0; line-height: 1.4; flex: 1;">${escapeHtml(t.description || 'Chưa có mô tả cho chủ đề này.')}</p>
+            </div>
+        `;
+      });
+      
+      html += `
+          </div>
+        </div>
+      `;
+      
+      container.innerHTML = html;
+    } catch (error) {
+      container.innerHTML = `<p style="color: var(--md-sys-color-error); text-align: center;">Lỗi khi tải chủ đề ôn tập: ${error.message}</p>`;
+    }
+    return;
+  }
+
   container.innerHTML = '<div class="spinner"></div>';
-
   try {
-    const topicsRes = await fetch('/api/topics');
-    if (!topicsRes.ok) throw new Error('Không thể tải dữ liệu chủ đề');
-    const topics = await topicsRes.json();
-
     let allVocab = [];
-    for (const t of topics) {
-      const res = await fetch(`/api/topics/${t.id}/vocabularies`);
-      if (res.ok) {
-        const data = await res.json();
-        allVocab = allVocab.concat(data.vocabularies);
+    if (state.practiceTopicId === 'all') {
+      const topicsRes = await fetch('/api/topics');
+      if (!topicsRes.ok) throw new Error('Không thể tải dữ liệu chủ đề');
+      const topics = await topicsRes.json();
+      for (const t of topics) {
+        const res = await fetch(`/api/topics/${t.id}/vocabularies`);
+        if (res.ok) {
+          const data = await res.json();
+          allVocab = allVocab.concat(data.vocabularies);
+        }
       }
+    } else {
+      const res = await fetch(`/api/topics/${state.practiceTopicId}/vocabularies`);
+      if (!res.ok) throw new Error('Không thể tải từ vựng của chủ đề này');
+      const data = await res.json();
+      allVocab = data.vocabularies;
     }
 
     state.studyWords = shuffleArray(allVocab);
@@ -613,7 +705,12 @@ async function initPracticeView() {
 
     renderPracticeCard();
   } catch (error) {
-    container.innerHTML = `<p style="color: var(--md-sys-color-error); text-align: center;">Lỗi khi tải từ ôn tập: ${error.message}</p>`;
+    container.innerHTML = `
+      <p style="color: var(--md-sys-color-error); text-align: center;">Lỗi khi tải từ ôn tập: ${error.message}</p>
+      <div style="text-align: center; margin-top: 16px;">
+        <md-filled-button onclick="resetPracticeTopicSelection()">Chọn chủ đề khác</md-filled-button>
+      </div>
+    `;
   }
 }
 
@@ -625,8 +722,11 @@ function renderPracticeCard() {
       <div class="empty-state">
         <span class="empty-icon">school</span>
         <h3>Chưa có từ vựng nào để ôn tập</h3>
-        <p>Thêm từ vựng mới và ví dụ minh họa của bạn trước để có thể tiến hành luyện tập.</p>
-        <md-filled-button onclick="navigateTo('dictionary')">Đi tra từ mới</md-filled-button>
+        <p>Thêm từ vựng mới và ví dụ minh họa của bạn trước để có thể tiến hành luyện tập chủ đề này.</p>
+        <div style="display: flex; gap: 12px; margin-top: 12px; justify-content: center;">
+          <md-filled-button onclick="navigateTo('dictionary')">Đi tra từ mới</md-filled-button>
+          <md-outlined-button onclick="resetPracticeTopicSelection()">Quay lại chọn chủ đề</md-outlined-button>
+        </div>
       </div>
     `;
     return;
@@ -641,7 +741,13 @@ function renderPracticeCard() {
   container.innerHTML = `
     <div class="study-card-wrapper">
       <div class="study-card">
-        <div class="study-card-progress">Từ số ${state.studyIndex + 1} / ${state.studyWords.length}</div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; font-size:0.85rem; color:var(--md-sys-color-on-surface-variant);">
+          <span style="display:flex; align-items:center; gap:4px; font-weight:500;">
+            <span class="material-symbols-outlined" style="font-size:16px;">folder</span>
+            Chủ đề: ${escapeHtml(state.practiceTopicName)}
+          </span>
+          <span>Từ số ${state.studyIndex + 1} / ${state.studyWords.length}</span>
+        </div>
         
         <div class="study-card-front" style="padding-bottom: 8px;">
           <div class="practice-word-display" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
@@ -692,10 +798,14 @@ function renderPracticeCard() {
         </div>
       </div>
 
-      <div style="text-align: center; margin-top: 16px;">
+      <div style="text-align: center; margin-top: 16px; display: flex; justify-content: center; gap: 12px;">
         <md-outlined-button onclick="initPracticeView()">
           <span slot="icon" class="material-symbols-outlined">shuffle</span>
           Trộn lại thẻ
+        </md-outlined-button>
+        <md-outlined-button onclick="resetPracticeTopicSelection()">
+          <span slot="icon" class="material-symbols-outlined">arrow_back</span>
+          Chọn chủ đề khác
         </md-outlined-button>
       </div>
     </div>
@@ -705,6 +815,20 @@ function renderPracticeCard() {
     const input = document.getElementById('practice-sentence-input');
     if (input) input.focus();
   }, 100);
+}
+
+function selectPracticeTopic(topicId, topicName) {
+  state.practiceTopicId = topicId;
+  state.practiceTopicName = topicName;
+  initPracticeView();
+}
+
+function resetPracticeTopicSelection() {
+  state.practiceTopicId = null;
+  state.practiceTopicName = '';
+  state.studyWords = [];
+  state.studyIndex = 0;
+  initPracticeView();
 }
 
 function validatePracticeSentence() {
