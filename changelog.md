@@ -1,5 +1,9 @@
 [19/07/2026]
 CẬP NHẬT:
+- Thiết kế lại giao diện điều hướng thích ứng theo chuẩn Material Design 3: Thay thế sidebar tĩnh cũ bằng Navigation Rail (Desktop) và Navigation Drawer di động + Scrim backdrop + Mobile AppBar.
+- Tích hợp tông màu đỏ và cơ chế đổi theme Sáng/Tối chuẩn M3 từ website limorina.io.vn (màu đỏ `#bf0030` làm Primary và hồng nhạt `#ffdad9` làm Primary Container), đồng bộ lưu trữ qua localStorage.
+- Sửa lỗi tràn viền (overflow) làm thò lề trái của Navigation Drawer khi ở trạng thái ẩn bằng việc áp dụng `box-sizing: border-box`.
+- Chỉ định thư mục cấu hình agent `.agents/` vào `.gitignore` để tránh rò rỉ dữ liệu cấu hình.
 - Đẩy ô nghĩa tiếng Việt lên đầu, thêm API dịch vào từng ô nghĩa cụ thể của tiếng Anh, nhằm đảm bảo người dùng hiểu cụ thể từng nghĩa.
 - Thay đổi cách thức hoạt động của chế độ luyện tập: Phân chia chế độ luyện tập thành luyện tập từng từ theo topic và luyện tập tổng hợp các từ thuộc nhiều topic.
 - Sửa lỗi không thể xóa topic.
