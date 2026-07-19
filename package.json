@@ -8,10 +8,11 @@
     "node": "20.18.0"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "prisma generate && tsc",
     "start": "node dist/server.js",
     "dev": "nodemon --exec \"node --loader ts-node/esm\" src/server.ts",
-    "db:migrate": "prisma migrate dev"
+    "db:migrate": "prisma migrate dev",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@prisma/client": "^5.11.0",
