@@ -1,5 +1,7 @@
 [19/07/2026]
 CẬP NHẬT:
+- Tích hợp menu Cài đặt (Settings) trực quan ở chân của Navigation Rail (Desktop) và Navigation Drawer (Mobile) bao gồm các thiết lập: chuyển đổi theme, xuất/nhập tiến trình JSON.
+- Triển khai tính năng Sao lưu (Export) và Phục hồi (Import) tiến độ học tập (XP, chủ đề, từ vựng) dưới dạng file JSON tĩnh mà không cần tài khoản, đi kèm cơ chế cảnh báo ghi đè dữ liệu.
 - Thiết kế lại giao diện điều hướng thích ứng theo chuẩn Material Design 3: Thay thế sidebar tĩnh cũ bằng Navigation Rail (Desktop) và Navigation Drawer di động + Scrim backdrop + Mobile AppBar.
 - Cập nhật lại tông màu giao diện chuẩn M3 sang hệ màu Tím đất (màu tím `#8d437f` làm Primary và hồng nhạt `#ffd7f1` làm Primary Container) trên cả hai chế độ Sáng/Tối, lưu trữ qua localStorage.
 - Sửa lỗi tràn viền (overflow) làm thò lề trái của Navigation Drawer khi ở trạng thái ẩn bằng việc áp dụng `box-sizing: border-box`.
