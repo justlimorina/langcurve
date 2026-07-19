@@ -1,86 +1,158 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
 
 :root {
-  /* User-supplied Color Palette (Material Design 3 Theme) */
-  --primary: #7D5973;
-  --primary-tint-10: #8A6A81;
-  --primary-tint-20: #977A8F;
-  --primary-tint-30: #A48B9D;
-  --primary-tint-40: #B19BAB;
-  --primary-tint-50: #BEACB9;
-  --primary-tint-60: #CBBDC7;
-  --primary-tint-70: #D8CDD5;
-  --primary-tint-80: #E5DEE3;
-  --primary-tint-90: #F2EEF1;
-  --primary-shade-10: #715068;
-  --primary-shade-20: #64475C;
-  --primary-shade-30: #583E51;
-  --primary-shade-40: #4B3545;
-  --primary-shade-50: #3F2D3A;
-  --primary-shade-60: #32242E;
-  --primary-shade-70: #261B23;
-  --primary-shade-80: #191217;
-  --primary-shade-90: #0C090B;
-
-  /* Material Design 3 Theme System Colors */
-  --md-sys-color-primary: #8d437f;
+  /* M3 Color Tokens (Light scheme) - Matching limorina.io.vn */
+  --md-sys-color-primary: #bf0030;
   --md-sys-color-on-primary: #ffffff;
-  --md-sys-color-primary-container: #ffd7f1;
-  --md-sys-color-on-primary-container: #390034;
-  --md-sys-color-secondary: #6f5867;
+  --md-sys-color-primary-container: #ffdad9;
+  --md-sys-color-on-primary-container: #41000a;
+
+  /* Secondary */
+  --md-sys-color-secondary: #775656;
   --md-sys-color-on-secondary: #ffffff;
-  --md-sys-color-secondary-container: #f9daed;
-  --md-sys-color-on-secondary-container: #271623;
-  --md-sys-color-tertiary: #815342;
+  --md-sys-color-secondary-container: #ffdad9;
+  --md-sys-color-on-secondary-container: #2c1516;
+
+  /* Tertiary */
+  --md-sys-color-tertiary: #755a2f;
   --md-sys-color-on-tertiary: #ffffff;
-  --md-sys-color-tertiary-container: #ffdbcf;
-  --md-sys-color-on-tertiary-container: #321206;
+  --md-sys-color-tertiary-container: #ffddb3;
+  --md-sys-color-on-tertiary-container: #291800;
+
+  /* Surface & Background */
+  --md-sys-color-background: #fff8f7;
+  --md-sys-color-on-background: #201a1a;
+  --md-sys-color-surface: #fff8f7;
+  --md-sys-color-on-surface: #201a1a;
+  --md-sys-color-surface-variant: #f5dddd;
+  --md-sys-color-on-surface-variant: #534343;
+  --md-sys-color-surface-container-lowest: #ffffff;
+  --md-sys-color-surface-container-low: #fef1f0;
+  --md-sys-color-surface-container: #f8ebea;
+  --md-sys-color-surface-container-high: #f2e5e4;
+  --md-sys-color-surface-container-highest: #ecdfde;
+
+  /* Outline */
+  --md-sys-color-outline: #857373;
+  --md-sys-color-outline-variant: #d8c2c1;
+
+  /* Error */
   --md-sys-color-error: #ba1a1a;
   --md-sys-color-on-error: #ffffff;
   --md-sys-color-error-container: #ffdad6;
   --md-sys-color-on-error-container: #410002;
-  --md-sys-color-background: #fffbff;
-  --md-sys-color-on-background: #1f1a1d;
-  --md-sys-color-surface: #fffbff;
-  --md-sys-color-on-surface: #1f1a1d;
-  --md-sys-color-surface-variant: #efdee6;
-  --md-sys-color-on-surface-variant: #4e444a;
-  --md-sys-color-outline: #80747b;
-  --md-sys-color-outline-variant: #d2c2ca;
-  --md-sys-color-inverse-surface: #342f32;
-  --md-sys-color-inverse-on-surface: #f8eef2;
-  --md-sys-color-inverse-primary: #ffacea;
-  --md-sys-color-surface-container-lowest: #ffffff;
-  --md-sys-color-surface-container-low: #fbf1f4;
-  --md-sys-color-surface-container: #f5ebef;
-  --md-sys-color-surface-container-high: #f0e6e9;
-  --md-sys-color-surface-container-highest: #eae0e3;
 
-  /* Layout and shapes */
+  /* Inverse */
+  --md-sys-color-inverse-surface: #362f2f;
+  --md-sys-color-inverse-on-surface: #fbeeec;
+  --md-sys-color-inverse-primary: #ffb3b3;
+
+  /* Extra Tonal Specs */
+  --md-sys-color-shadow: #000000;
+  --md-sys-color-scrim: #000000;
+
+  /* Legacy color mapping for existing LangCurve classes */
+  --primary: var(--md-sys-color-primary);
+  --primary-tint-10: #d61a47;
+  --primary-tint-20: #eb335e;
+  --primary-tint-30: #ff4d75;
+  --primary-tint-40: #ff668c;
+  --primary-tint-50: #ff80a3;
+  --primary-tint-60: #ff99ba;
+  --primary-tint-70: #ffb3d1;
+  --primary-tint-80: #ffcce8;
+  --primary-tint-90: #ffe6ff;
+  --primary-shade-10: #ab0027;
+  --primary-shade-20: #96001f;
+  --primary-shade-30: #810017;
+  --primary-shade-40: #6d0010;
+  --primary-shade-50: #580008;
+  --primary-shade-60: #440003;
+  --primary-shade-70: #300000;
+  --primary-shade-80: #1b0000;
+  --primary-shade-90: #070000;
+  
+  /* Shapes & Layout */
   --radius-xs: 4px;
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
   --radius-xl: 28px;
   
-  --font-display: 'Outfit', sans-serif;
-  --font-body: 'Plus Jakarta Sans', sans-serif;
+  --font-display: 'Roboto', sans-serif;
+  --font-body: 'Roboto', sans-serif;
   
-  --shadow-1: 0px 1px 3px 1px rgba(0, 0, 0, 0.15), 0px 1px 2px 0px rgba(0, 0, 0, 0.3);
-  --shadow-2: 0px 2px 6px 2px rgba(0, 0, 0, 0.15), 0px 1.2px 2px 0px rgba(0, 0, 0, 0.3);
-  --shadow-3: 0px 4px 8px 3px rgba(0, 0, 0, 0.15), 0px 1px 3px 0px rgba(0, 0, 0, 0.3);
+  --md-sys-elevation-level0: none;
+  --md-sys-elevation-level1: 0px 1px 2px rgba(0,0,0,.3), 0px 1px 3px 1px rgba(0,0,0,.15);
+  --md-sys-elevation-level2: 0px 1px 2px rgba(0,0,0,.3), 0px 2px 6px 2px rgba(0,0,0,.15);
+  --md-sys-elevation-level3: 0px 4px 8px 3px rgba(0,0,0,.15), 0px 1px 3px rgba(0,0,0,.3);
 
-  /* Sidebar */
-  --sidebar-width: 200px;
+  --rail-width: 80px;
+}
+
+/* M3 Color Tokens (Dark scheme) - Matching limorina.io.vn */
+body.dark-theme {
+  --primary: #ffb3b3;
+  --primary-tint-10: #ffcccc;
+  --primary-tint-20: #ffe6e6;
+  --primary-tint-30: #ffffff;
+  --primary-shade-10: #e69999;
+  --primary-shade-20: #cc8080;
+  --primary-shade-30: #b36666;
+  --primary-shade-40: #994d4d;
+  --primary-shade-50: #803333;
+  --primary-shade-60: #661a1a;
+  --primary-shade-70: #4d0000;
+
+  --md-sys-color-primary: #ffb3b3;
+  --md-sys-color-on-primary: #680016;
+  --md-sys-color-primary-container: #920023;
+  --md-sys-color-on-primary-container: #ffdad9;
+
+  --md-sys-color-secondary: #e6bdbc;
+  --md-sys-color-on-secondary: #44292a;
+  --md-sys-color-secondary-container: #5d3f3f;
+  --md-sys-color-on-secondary-container: #ffdad9;
+
+  --md-sys-color-tertiary: #e5c18d;
+  --md-sys-color-on-tertiary: #422d05;
+  --md-sys-color-tertiary-container: #5b431a;
+  --md-sys-color-on-tertiary-container: #ffddb3;
+
+  --md-sys-color-background: #181212;
+  --md-sys-color-on-background: #ecdfde;
+  --md-sys-color-surface: #181212;
+  --md-sys-color-on-surface: #ecdfde;
+  --md-sys-color-surface-variant: #534343;
+  --md-sys-color-on-surface-variant: #d8c2c1;
+  
+  --md-sys-color-surface-container-lowest: #130d0d;
+  --md-sys-color-surface-container-low: #201a1a;
+  --md-sys-color-surface-container: #241e1e;
+  --md-sys-color-surface-container-high: #2f2828;
+  --md-sys-color-surface-container-highest: #3a3333;
+
+  --md-sys-color-outline: #a08c8c;
+  --md-sys-color-outline-variant: #534343;
+
+  --md-sys-color-error: #ffb4ab;
+  --md-sys-color-on-error: #690005;
+  --md-sys-color-error-container: #93000a;
+  --md-sys-color-on-error-container: #ffdad6;
+
+  --md-sys-color-inverse-surface: #ecdfde;
+  --md-sys-color-inverse-on-surface: #362f2f;
+  --md-sys-color-inverse-primary: #bf0030;
 }
 
 body {
-  background-color: var(--md-sys-color-surface-container-low);
+  background-color: var(--md-sys-color-background);
   color: var(--md-sys-color-on-background);
   font-family: var(--font-body);
   margin: 0;
   padding: 0;
   min-height: 100vh;
+  transition: background-color 300ms ease, color 300ms ease;
 }
 
 /* ============================================
@@ -92,78 +164,292 @@ body {
 }
 
 /* ============================================
-   SIDEBAR
+   M3 NAVIGATION RAIL (Desktop)
    ============================================ */
-.sidebar {
-  width: var(--sidebar-width);
-  min-height: 100vh;
-  background-color: var(--md-sys-color-surface-container-lowest);
+.md-nav-rail {
+  box-sizing: border-box;
+  width: var(--rail-width);
+  height: 100vh;
+  background-color: var(--md-sys-color-surface-container-low);
   border-right: 1px solid var(--md-sys-color-outline-variant);
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 0;
   position: fixed;
   top: 0;
   left: 0;
   z-index: 100;
+  transition: background-color 300ms ease, border-color 300ms ease;
 }
 
-.brand {
-  display: block;
+.md-nav-rail__top {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  width: 100%;
+}
+
+.md-nav-rail__logo-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 48px;
+  height: 48px;
   text-decoration: none;
-  padding: 20px 20px 16px;
 }
 
-.brand-name {
+.md-logo {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--md-sys-color-primary);
+  user-select: none;
+  letter-spacing: -0.5px;
+}
+
+.md-nav-rail__destinations {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.md-rail-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 64px;
+  text-decoration: none;
+  color: var(--md-sys-color-on-surface-variant);
+  cursor: pointer;
+  position: relative;
+  gap: 4px;
+  transition: color 200ms ease;
+}
+
+.md-rail-item__icon-container {
+  width: 56px;
+  height: 32px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  transition: background-color 200ms ease, color 200ms ease;
+}
+
+.md-rail-item__icon {
+  font-size: 24px;
+}
+
+.md-rail-item__label {
+  font-size: 0.72rem;
+  font-weight: 500;
+  text-align: center;
+  transition: color 200ms ease;
+}
+
+/* Hover and active states for Rail Items */
+.md-rail-item:hover .md-rail-item__icon-container {
+  background-color: rgba(191, 0, 48, 0.08);
+}
+body.dark-theme .md-rail-item:hover .md-rail-item__icon-container {
+  background-color: rgba(255, 179, 179, 0.08);
+}
+
+.md-rail-item.active .md-rail-item__icon-container {
+  background-color: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+}
+
+.md-rail-item.active .md-rail-item__label {
+  color: var(--md-sys-color-primary);
+  font-weight: 700;
+}
+
+.md-nav-rail__bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.theme-toggle-btn {
+  background: none;
+  border: none;
+  color: var(--md-sys-color-on-surface-variant);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  transition: background-color 200ms, color 200ms;
+}
+
+.theme-toggle-btn:hover {
+  background-color: rgba(0, 0, 0, 0.06);
+}
+body.dark-theme .theme-toggle-btn:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+/* ============================================
+   M3 NAVIGATION DRAWER & SCRIM
+   ============================================ */
+.md-scrim {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  z-index: 190;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 300ms ease, visibility 300ms ease;
+}
+
+.md-scrim.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.md-nav-drawer {
+  box-sizing: border-box;
+  width: 320px;
+  height: 100vh;
+  background-color: var(--md-sys-color-surface-container-low);
+  border-right: 1px solid var(--md-sys-color-outline-variant);
+  position: fixed;
+  top: 0;
+  left: -320px;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  transition: left 300ms cubic-bezier(0.2, 0, 0, 1), background-color 300ms ease;
+  padding: 16px;
+}
+
+.md-nav-drawer.active {
+  left: 0;
+}
+
+.md-nav-drawer__header {
+  display: flex;
+  align-items: center;
+  padding: 8px 0 16px;
+  gap: 8px;
+}
+
+.md-nav-drawer__content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.md-nav-drawer__headline {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--md-sys-color-on-surface-variant);
+  margin: 12px 12px 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.md-nav-drawer__list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.md-nav-item {
+  display: flex;
+  align-items: center;
+  height: 56px;
+  padding: 0 16px;
+  border-radius: 28px;
+  text-decoration: none;
+  color: var(--md-sys-color-on-surface-variant);
+  cursor: pointer;
+  gap: 12px;
+  transition: background-color 200ms ease, color 200ms ease;
+}
+
+.md-nav-item__label {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.md-nav-item:hover {
+  background-color: rgba(191, 0, 48, 0.06);
+}
+body.dark-theme .md-nav-item:hover {
+  background-color: rgba(255, 179, 179, 0.06);
+}
+
+.md-nav-item.active {
+  background-color: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+}
+
+.md-nav-item.active .md-nav-item__label {
+  font-weight: 700;
+}
+
+/* ============================================
+   MOBILE APP BAR
+   ============================================ */
+.mobile-app-bar {
+  box-sizing: border-box;
+  display: none;
+  height: 64px;
+  background-color: var(--md-sys-color-surface-container-low);
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+  align-items: center;
+  padding: 0 16px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 90;
+  gap: 16px;
+  transition: background-color 300ms ease, border-color 300ms ease;
+}
+
+.mobile-app-bar__title {
   font-family: var(--font-display);
   font-size: 1.25rem;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--md-sys-color-on-surface);
 }
 
-.sidebar-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-
-.sidebar-nav-item {
-  position: relative;
+.menu-btn {
+  background: none;
+  border: none;
+  color: var(--md-sys-color-on-surface);
   cursor: pointer;
-  transition: background-color 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  transition: background-color 200ms;
 }
 
-.sidebar-nav-item .nav-label {
-  display: block;
-  padding: 12px 20px;
-  font-family: var(--font-body);
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: var(--md-sys-color-primary);
-  user-select: none;
+.menu-btn:hover {
+  background-color: rgba(0, 0, 0, 0.06);
 }
-
-.sidebar-nav-item:hover {
-  background-color: var(--md-sys-color-surface-container);
-}
-
-.sidebar-nav-item.active {
-  background-color: var(--primary);
-}
-
-.sidebar-nav-item.active .nav-label {
-  color: var(--md-sys-color-on-primary);
-  font-weight: 600;
-}
-
-/* Active item left indicator bar matching wireframe */
-.sidebar-nav-item.active::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 4px;
-  background-color: var(--primary-shade-30);
+body.dark-theme .menu-btn:hover {
+  background-color: rgba(255, 255, 255, 0.08);
 }
 
 /* ============================================
@@ -171,9 +457,25 @@ body {
    ============================================ */
 .main-content {
   flex: 1;
-  margin-left: var(--sidebar-width);
+  margin-left: var(--rail-width);
   padding: 24px 32px;
   min-height: 100vh;
+  transition: margin-left 300ms ease;
+}
+
+@media (max-width: 839px) {
+  .md-nav-rail {
+    display: none;
+  }
+  
+  .mobile-app-bar {
+    display: flex;
+  }
+  
+  .main-content {
+    margin-left: 0;
+    padding-top: 88px;
+  }
 }
 
 /* View sections */
@@ -197,8 +499,8 @@ body {
 
 /* Hero Banner */
 .hero-banner {
-  background-color: var(--primary);
-  color: #fff;
+  background-color: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
   padding: 32px 36px;
   border-radius: var(--radius-md);
   margin-bottom: 20px;
@@ -227,8 +529,8 @@ body {
 }
 
 .stat-card {
-  background-color: var(--primary);
-  color: #fff;
+  background-color: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
   padding: 24px;
   border-radius: var(--radius-md);
   display: flex;
@@ -279,8 +581,8 @@ body {
 
 /* Video Section */
 .video-section {
-  background-color: var(--primary);
-  color: #fff;
+  background-color: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
   padding: 24px;
   border-radius: var(--radius-md);
 }
@@ -382,8 +684,8 @@ body {
 }
 
 .def-card {
-  background-color: var(--primary);
-  color: #fff;
+  background-color: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
   padding: 20px;
   border-radius: var(--radius-md);
   display: flex;
@@ -410,8 +712,8 @@ body {
 .def-card-save {
   align-self: flex-start;
   cursor: pointer;
-  background-color: var(--primary-tint-60);
-  color: var(--primary-shade-70);
+  background-color: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
   border: none;
   padding: 6px 16px;
   font-family: var(--font-body);
@@ -422,14 +724,14 @@ body {
 }
 
 .def-card-save:hover {
-  background-color: var(--primary-tint-80);
-  color: var(--primary-shade-80);
+  background-color: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
 }
 
 /* Vietnamese Meaning Block */
 .vi-meaning-block {
-  background-color: var(--primary);
-  color: #fff;
+  background-color: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
   padding: 20px 24px;
   border-radius: var(--radius-md);
   margin-bottom: 24px;
@@ -596,8 +898,8 @@ body {
 }
 
 .topic-banner {
-  background-color: var(--primary);
-  color: #fff;
+  background-color: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
   padding: 24px;
   border-radius: var(--radius-md);
   margin-bottom: 8px;

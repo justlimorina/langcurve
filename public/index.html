@@ -15,28 +15,100 @@
   <script type="module" src="https://esm.sh/@material/web@1.5.0/all.js"></script>
 </head>
 <body>
-  <div class="app-container">
-    <!-- Sidebar Navigation Drawer -->
-    <aside class="sidebar">
-      <a href="#" class="brand" onclick="navigateTo('dashboard'); return false;">
-        <span class="brand-name">LangCurve</span>
+  <!-- SCRIM OVERLAY (M3 Modal Drawer backdrop) -->
+  <div class="md-scrim" id="drawerScrim" aria-hidden="true" onclick="closeNav()"></div>
+
+  <!-- MOBILE APP BAR -->
+  <header class="mobile-app-bar">
+    <button class="menu-btn" id="menuToggleBtn" aria-label="Open navigation menu" onclick="openNav()">
+      <span class="material-symbols-outlined">menu</span>
+    </button>
+    <span class="mobile-app-bar__title">LangCurve</span>
+  </header>
+
+  <!-- M3 NAVIGATION RAIL (Desktop) -->
+  <aside class="md-nav-rail" id="navRail">
+    <div class="md-nav-rail__top">
+      <a href="#" class="md-nav-rail__logo-wrapper" aria-label="LangCurve" onclick="navigateTo('dashboard'); return false;">
+        <span class="md-logo">LC</span>
       </a>
-      
-      <nav class="sidebar-nav">
-        <div class="sidebar-nav-item active" id="nav-dashboard" onclick="navigateTo('dashboard')">
-          <span class="nav-label">Dashboard</span>
+    </div>
+
+    <div class="md-nav-rail__destinations">
+      <a href="#" class="md-rail-item active" id="rail-dashboard" onclick="navigateTo('dashboard'); return false;">
+        <div class="md-rail-item__icon-container">
+          <span class="material-symbols-outlined md-rail-item__icon">dashboard</span>
         </div>
-        <div class="sidebar-nav-item" id="nav-dictionary" onclick="navigateTo('dictionary')">
-          <span class="nav-label">Dictionary</span>
+        <span class="md-rail-item__label">Dashboard</span>
+      </a>
+
+      <a href="#" class="md-rail-item" id="rail-dictionary" onclick="navigateTo('dictionary'); return false;">
+        <div class="md-rail-item__icon-container">
+          <span class="material-symbols-outlined md-rail-item__icon">search</span>
         </div>
-        <div class="sidebar-nav-item" id="nav-notebook" onclick="navigateTo('notebook')">
-          <span class="nav-label">Notebook</span>
+        <span class="md-rail-item__label">Dictionary</span>
+      </a>
+
+      <a href="#" class="md-rail-item" id="rail-notebook" onclick="navigateTo('notebook'); return false;">
+        <div class="md-rail-item__icon-container">
+          <span class="material-symbols-outlined md-rail-item__icon">book</span>
         </div>
-        <div class="sidebar-nav-item" id="nav-practice" onclick="navigateTo('practice')">
-          <span class="nav-label">Practice</span>
+        <span class="md-rail-item__label">Notebook</span>
+      </a>
+
+      <a href="#" class="md-rail-item" id="rail-practice" onclick="navigateTo('practice'); return false;">
+        <div class="md-rail-item__icon-container">
+          <span class="material-symbols-outlined md-rail-item__icon">fitness_center</span>
         </div>
-      </nav>
-    </aside>
+        <span class="md-rail-item__label">Practice</span>
+      </a>
+    </div>
+
+    <div class="md-nav-rail__bottom">
+      <button class="theme-toggle-btn" id="railThemeToggleBtn" aria-label="Toggle dark mode" onclick="toggleTheme()">
+        <span class="material-symbols-outlined">dark_mode</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- M3 NAVIGATION DRAWER (Mobile/Tablet) -->
+  <nav class="md-nav-drawer" id="navDrawer" aria-label="Site navigation" aria-modal="true" role="dialog">
+    <div class="md-nav-drawer__header">
+      <button class="menu-btn" id="closeDrawerBtn" aria-label="Close navigation" onclick="closeNav()">
+        <span class="material-symbols-outlined">menu_open</span>
+      </button>
+      <span style="font-size:16px; font-weight:500; color:var(--md-sys-color-on-surface); margin-left:4px;">
+        LangCurve
+      </span>
+    </div>
+
+    <div class="md-nav-drawer__content">
+      <p class="md-nav-drawer__headline">Điều hướng</p>
+      <div class="md-nav-drawer__list">
+        <a href="#" class="md-nav-item active" id="nav-dashboard" onclick="navigateTo('dashboard'); closeNav(); return false;">
+          <span class="material-symbols-outlined">dashboard</span>
+          <span class="md-nav-item__label">Dashboard</span>
+        </a>
+
+        <a href="#" class="md-nav-item" id="nav-dictionary" onclick="navigateTo('dictionary'); closeNav(); return false;">
+          <span class="material-symbols-outlined">search</span>
+          <span class="md-nav-item__label">Dictionary</span>
+        </a>
+
+        <a href="#" class="md-nav-item" id="nav-notebook" onclick="navigateTo('notebook'); closeNav(); return false;">
+          <span class="material-symbols-outlined">book</span>
+          <span class="md-nav-item__label">Notebook</span>
+        </a>
+
+        <a href="#" class="md-nav-item" id="nav-practice" onclick="navigateTo('practice'); closeNav(); return false;">
+          <span class="material-symbols-outlined">fitness_center</span>
+          <span class="md-nav-item__label">Practice</span>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="app-container">
 
     <!-- Main Content Area -->
     <main class="main-content">

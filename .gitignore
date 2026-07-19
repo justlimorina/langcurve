@@ -4,3 +4,4 @@ dist/
 .cache/
 langcurve.db
 langcurve.db-journal
+.agents/

@@ -19,19 +19,73 @@ const state = {
 
 // Initialize Application
 document.addEventListener('DOMContentLoaded', () => {
+  initTheme();
   updateStats();
   navigateTo('dashboard');
 });
 
 // ============================================
-// NAVIGATION & ROUTING
+// THEME & NAVIGATION CONTROLS
 // ============================================
+
+// Initialize theme from localStorage or system preference
+function initTheme() {
+  const savedTheme = localStorage.getItem('theme');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const isDark = savedTheme === 'dark' || (!savedTheme && prefersDark);
+  
+  if (isDark) {
+    document.body.classList.add('dark-theme');
+  } else {
+    document.body.classList.remove('dark-theme');
+  }
+  updateThemeIcons(isDark);
+}
+
+// Toggle light/dark theme
+function toggleTheme() {
+  const body = document.body;
+  body.classList.toggle('dark-theme');
+  
+  const isDark = body.classList.contains('dark-theme');
+  localStorage.setItem('theme', isDark ? 'dark' : 'light');
+  updateThemeIcons(isDark);
+}
+
+// Update the theme icon text
+function updateThemeIcons(isDark) {
+  const toggleBtn = document.getElementById('railThemeToggleBtn');
+  if (toggleBtn) {
+    const icon = toggleBtn.querySelector('span');
+    if (icon) {
+      icon.textContent = isDark ? 'light_mode' : 'dark_mode';
+    }
+  }
+}
+
+// Navigation Drawer control functions
+function openNav() {
+  const drawer = document.getElementById('navDrawer');
+  const scrim = document.getElementById('drawerScrim');
+  if (drawer) drawer.classList.add('active');
+  if (scrim) scrim.classList.add('active');
+}
+
+function closeNav() {
+  const drawer = document.getElementById('navDrawer');
+  const scrim = document.getElementById('drawerScrim');
+  if (drawer) drawer.classList.remove('active');
+  if (scrim) scrim.classList.remove('active');
+}
+
+// Navigation Routing function
 function navigateTo(viewName, params = {}) {
   // Hide all sections
   document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
 
-  // Remove active class from menu items
-  document.querySelectorAll('.sidebar-nav-item').forEach(i => i.classList.remove('active'));
+  // Remove active class from Rail and Drawer items
+  document.querySelectorAll('.md-rail-item').forEach(i => i.classList.remove('active'));
+  document.querySelectorAll('.md-nav-item').forEach(i => i.classList.remove('active'));
 
   // Activate chosen section
   const section = document.getElementById(`${viewName}-view`);
@@ -40,6 +94,10 @@ function navigateTo(viewName, params = {}) {
   // Update nav visual — topic-details highlights notebook
   const navMap = { 'topic-details': 'notebook' };
   const navKey = navMap[viewName] || viewName;
+  
+  const railItem = document.getElementById(`rail-${navKey}`);
+  if (railItem) railItem.classList.add('active');
+
   const navItem = document.getElementById(`nav-${navKey}`);
   if (navItem) navItem.classList.add('active');
 
