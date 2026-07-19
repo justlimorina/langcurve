@@ -370,42 +370,70 @@ function renderDictionaryResults(apiData) {
   });
 }
 
+async function translateText(text) {
+  try {
+    // 1. Try Google Translate API (free, reliable, high quota)
+    const googleUrl = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=vi&dt=t&q=${encodeURIComponent(text)}`;
+    const res = await fetch(googleUrl);
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data) && data[0] && Array.isArray(data[0])) {
+        const translated = data[0]
+          .map(x => x[0])
+          .filter(Boolean)
+          .join('');
+        if (translated && !translated.includes("MYMEMORY WARNING")) {
+          return translated;
+        }
+      }
+    }
+  } catch (e) {
+    console.warn("Google Translate failed, trying fallback...", e);
+  }
+
+  try {
+    // 2. Fallback to MyMemory API (with contact email to increase daily quota to 10k words)
+    const myMemoryUrl = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|vi&de=langcurve_app@outlook.com`;
+    const res = await fetch(myMemoryUrl);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.responseData && data.responseData.translatedText) {
+        const translated = data.responseData.translatedText;
+        if (translated && !translated.includes("MYMEMORY WARNING")) {
+          return translated;
+        }
+      }
+    }
+  } catch (e) {
+    console.error("MyMemory Translate failed", e);
+  }
+
+  return null;
+}
+
 async function translateDefinition(text, elementId) {
   const el = document.getElementById(elementId);
   if (!el) return;
 
-  try {
-    const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|vi`);
-    if (res.ok) {
-      const data = await res.json();
-      if (data.responseData && data.responseData.translatedText) {
-        el.innerHTML = `<span class="material-symbols-outlined" style="font-size:14px; vertical-align:middle; margin-right:4px;">translate</span>${escapeHtml(data.responseData.translatedText)}`;
-        return;
-      }
-    }
+  el.textContent = 'Đang dịch...';
+  const translated = await translateText(text);
+  if (translated) {
+    el.innerHTML = `<span class="material-symbols-outlined" style="font-size:14px; vertical-align:middle; margin-right:4px;">translate</span>${escapeHtml(translated)}`;
+  } else {
     el.textContent = '(Không thể dịch tự động)';
-  } catch (e) {
-    el.textContent = '(Lỗi dịch)';
   }
 }
-
 
 async function fetchVietnameseMeaning(word) {
   const el = document.getElementById('dict-vi-meaning');
   if (!el) return;
 
-  try {
-    const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(word)}&langpair=en|vi`);
-    if (res.ok) {
-      const data = await res.json();
-      if (data.responseData && data.responseData.translatedText) {
-        el.textContent = data.responseData.translatedText;
-        return;
-      }
-    }
+  el.textContent = 'Đang dịch...';
+  const translated = await translateText(word);
+  if (translated) {
+    el.textContent = translated;
+  } else {
     el.textContent = '(Không thể dịch tự động. Bạn có thể tự nhập nghĩa tiếng Việt.)';
-  } catch (e) {
-    el.textContent = '(Không thể kết nối dịch vụ dịch.)';
   }
 }
 
