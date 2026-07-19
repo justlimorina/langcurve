@@ -1,76 +1,64 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
 
 :root {
-  /* M3 Color Tokens (Light scheme) - Matching limorina.io.vn */
-  --md-sys-color-primary: #bf0030;
+  /* User-supplied Custom Purple M3 Palette */
+  --primary: #7D5973;
+  --primary-tint-10: #8A6A81;
+  --primary-tint-20: #977A8F;
+  --primary-tint-30: #A48B9D;
+  --primary-tint-40: #B19BAB;
+  --primary-tint-50: #BEACB9;
+  --primary-tint-60: #CBBDC7;
+  --primary-tint-70: #D8CDD5;
+  --primary-tint-80: #E5DEE3;
+  --primary-tint-90: #F2EEF1;
+  --primary-shade-10: #715068;
+  --primary-shade-20: #64475C;
+  --primary-shade-30: #583E51;
+  --primary-shade-40: #4B3545;
+  --primary-shade-50: #3F2D3A;
+  --primary-shade-60: #32242E;
+  --primary-shade-70: #261B23;
+  --primary-shade-80: #191217;
+  --primary-shade-90: #0C090B;
+
+  /* Material Design 3 Theme Colors */
+  --md-sys-color-primary: #8d437f;
   --md-sys-color-on-primary: #ffffff;
-  --md-sys-color-primary-container: #ffdad9;
-  --md-sys-color-on-primary-container: #41000a;
-
-  /* Secondary */
-  --md-sys-color-secondary: #775656;
+  --md-sys-color-primary-container: #ffd7f1;
+  --md-sys-color-on-primary-container: #390034;
+  --md-sys-color-secondary: #6f5867;
   --md-sys-color-on-secondary: #ffffff;
-  --md-sys-color-secondary-container: #ffdad9;
-  --md-sys-color-on-secondary-container: #2c1516;
-
-  /* Tertiary */
-  --md-sys-color-tertiary: #755a2f;
+  --md-sys-color-secondary-container: #f9daed;
+  --md-sys-color-on-secondary-container: #271623;
+  --md-sys-color-tertiary: #815342;
   --md-sys-color-on-tertiary: #ffffff;
-  --md-sys-color-tertiary-container: #ffddb3;
-  --md-sys-color-on-tertiary-container: #291800;
-
-  /* Surface & Background */
-  --md-sys-color-background: #fff8f7;
-  --md-sys-color-on-background: #201a1a;
-  --md-sys-color-surface: #fff8f7;
-  --md-sys-color-on-surface: #201a1a;
-  --md-sys-color-surface-variant: #f5dddd;
-  --md-sys-color-on-surface-variant: #534343;
-  --md-sys-color-surface-container-lowest: #ffffff;
-  --md-sys-color-surface-container-low: #fef1f0;
-  --md-sys-color-surface-container: #f8ebea;
-  --md-sys-color-surface-container-high: #f2e5e4;
-  --md-sys-color-surface-container-highest: #ecdfde;
-
-  /* Outline */
-  --md-sys-color-outline: #857373;
-  --md-sys-color-outline-variant: #d8c2c1;
-
-  /* Error */
+  --md-sys-color-tertiary-container: #ffdbcf;
+  --md-sys-color-on-tertiary-container: #321206;
   --md-sys-color-error: #ba1a1a;
   --md-sys-color-on-error: #ffffff;
   --md-sys-color-error-container: #ffdad6;
   --md-sys-color-on-error-container: #410002;
-
-  /* Inverse */
-  --md-sys-color-inverse-surface: #362f2f;
-  --md-sys-color-inverse-on-surface: #fbeeec;
-  --md-sys-color-inverse-primary: #ffb3b3;
+  --md-sys-color-background: #fffbff;
+  --md-sys-color-on-background: #1f1a1d;
+  --md-sys-color-surface: #fffbff;
+  --md-sys-color-on-surface: #1f1a1d;
+  --md-sys-color-surface-variant: #efdee6;
+  --md-sys-color-on-surface-variant: #4e444a;
+  --md-sys-color-outline: #80747b;
+  --md-sys-color-outline-variant: #d2c2ca;
+  --md-sys-color-inverse-surface: #342f32;
+  --md-sys-color-inverse-on-surface: #f8eef2;
+  --md-sys-color-inverse-primary: #ffacea;
+  --md-sys-color-surface-container-lowest: #ffffff;
+  --md-sys-color-surface-container-low: #fbf1f4;
+  --md-sys-color-surface-container: #f5ebef;
+  --md-sys-color-surface-container-high: #f0e6e9;
+  --md-sys-color-surface-container-highest: #eae0e3;
 
   /* Extra Tonal Specs */
   --md-sys-color-shadow: #000000;
   --md-sys-color-scrim: #000000;
-
-  /* Legacy color mapping for existing LangCurve classes */
-  --primary: var(--md-sys-color-primary);
-  --primary-tint-10: #d61a47;
-  --primary-tint-20: #eb335e;
-  --primary-tint-30: #ff4d75;
-  --primary-tint-40: #ff668c;
-  --primary-tint-50: #ff80a3;
-  --primary-tint-60: #ff99ba;
-  --primary-tint-70: #ffb3d1;
-  --primary-tint-80: #ffcce8;
-  --primary-tint-90: #ffe6ff;
-  --primary-shade-10: #ab0027;
-  --primary-shade-20: #96001f;
-  --primary-shade-30: #810017;
-  --primary-shade-40: #6d0010;
-  --primary-shade-50: #580008;
-  --primary-shade-60: #440003;
-  --primary-shade-70: #300000;
-  --primary-shade-80: #1b0000;
-  --primary-shade-90: #070000;
   
   /* Shapes & Layout */
   --radius-xs: 4px;
@@ -90,59 +78,59 @@
   --rail-width: 80px;
 }
 
-/* M3 Color Tokens (Dark scheme) - Matching limorina.io.vn */
+/* Custom Purple M3 Dark scheme */
 body.dark-theme {
-  --primary: #ffb3b3;
-  --primary-tint-10: #ffcccc;
-  --primary-tint-20: #ffe6e6;
+  --primary: #ffacea;
+  --primary-tint-10: #ffccf5;
+  --primary-tint-20: #ffe6fb;
   --primary-tint-30: #ffffff;
-  --primary-shade-10: #e69999;
-  --primary-shade-20: #cc8080;
-  --primary-shade-30: #b36666;
-  --primary-shade-40: #994d4d;
-  --primary-shade-50: #803333;
-  --primary-shade-60: #661a1a;
-  --primary-shade-70: #4d0000;
+  --primary-shade-10: #e699d5;
+  --primary-shade-20: #cc80be;
+  --primary-shade-30: #b366a6;
+  --primary-shade-40: #994d8e;
+  --primary-shade-50: #803377;
+  --primary-shade-60: #661a5f;
+  --primary-shade-70: #4d0047;
 
-  --md-sys-color-primary: #ffb3b3;
-  --md-sys-color-on-primary: #680016;
-  --md-sys-color-primary-container: #920023;
-  --md-sys-color-on-primary-container: #ffdad9;
+  --md-sys-color-primary: #ffacea;
+  --md-sys-color-on-primary: #57124d;
+  --md-sys-color-primary-container: #722b66;
+  --md-sys-color-on-primary-container: #ffd7f1;
 
-  --md-sys-color-secondary: #e6bdbc;
-  --md-sys-color-on-secondary: #44292a;
-  --md-sys-color-secondary-container: #5d3f3f;
-  --md-sys-color-on-secondary-container: #ffdad9;
+  --md-sys-color-secondary: #dbbfd0;
+  --md-sys-color-on-secondary: #3e2b38;
+  --md-sys-color-secondary-container: #56404f;
+  --md-sys-color-on-secondary-container: #f9daed;
 
-  --md-sys-color-tertiary: #e5c18d;
-  --md-sys-color-on-tertiary: #422d05;
-  --md-sys-color-tertiary-container: #5b431a;
-  --md-sys-color-on-tertiary-container: #ffddb3;
+  --md-sys-color-tertiary: #f3b9a5;
+  --md-sys-color-on-tertiary: #4c2618;
+  --md-sys-color-tertiary-container: #663c2c;
+  --md-sys-color-on-tertiary-container: #ffdbcf;
 
-  --md-sys-color-background: #181212;
-  --md-sys-color-on-background: #ecdfde;
-  --md-sys-color-surface: #181212;
-  --md-sys-color-on-surface: #ecdfde;
-  --md-sys-color-surface-variant: #534343;
-  --md-sys-color-on-surface-variant: #d8c2c1;
+  --md-sys-color-background: #1f1a1d;
+  --md-sys-color-on-background: #eae0e3;
+  --md-sys-color-surface: #1f1a1d;
+  --md-sys-color-on-surface: #eae0e3;
+  --md-sys-color-surface-variant: #4e444a;
+  --md-sys-color-on-surface-variant: #d2c2ca;
   
-  --md-sys-color-surface-container-lowest: #130d0d;
-  --md-sys-color-surface-container-low: #201a1a;
-  --md-sys-color-surface-container: #241e1e;
-  --md-sys-color-surface-container-high: #2f2828;
-  --md-sys-color-surface-container-highest: #3a3333;
+  --md-sys-color-surface-container-lowest: #1a1518;
+  --md-sys-color-surface-container-low: #282225;
+  --md-sys-color-surface-container: #2d272a;
+  --md-sys-color-surface-container-high: #383135;
+  --md-sys-color-surface-container-highest: #433c40;
 
-  --md-sys-color-outline: #a08c8c;
-  --md-sys-color-outline-variant: #534343;
+  --md-sys-color-outline: #9b8994;
+  --md-sys-color-outline-variant: #4e444a;
 
   --md-sys-color-error: #ffb4ab;
   --md-sys-color-on-error: #690005;
   --md-sys-color-error-container: #93000a;
   --md-sys-color-on-error-container: #ffdad6;
 
-  --md-sys-color-inverse-surface: #ecdfde;
-  --md-sys-color-inverse-on-surface: #362f2f;
-  --md-sys-color-inverse-primary: #bf0030;
+  --md-sys-color-inverse-surface: #eae0e3;
+  --md-sys-color-inverse-on-surface: #342f32;
+  --md-sys-color-inverse-primary: #8d437f;
 }
 
 body {
@@ -299,6 +287,63 @@ body.dark-theme .md-rail-item:hover .md-rail-item__icon-container {
 }
 body.dark-theme .theme-toggle-btn:hover {
   background-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Settings Popup Menu (Desktop) */
+.settings-popup {
+  box-sizing: border-box;
+  position: absolute;
+  bottom: 72px;
+  left: 12px;
+  background-color: var(--md-sys-color-surface-container-high);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--radius-md);
+  box-shadow: var(--md-sys-elevation-level2);
+  display: none;
+  flex-direction: column;
+  min-width: 220px;
+  z-index: 150;
+  padding: 8px 0;
+  animation: popupFadeIn 200ms ease;
+}
+
+.settings-popup.active {
+  display: flex;
+}
+
+@keyframes popupFadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.settings-popup-item {
+  box-sizing: border-box;
+  background: none;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  color: var(--md-sys-color-on-surface);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  transition: background-color 150ms ease;
+}
+
+.settings-popup-item:hover {
+  background-color: rgba(141, 67, 127, 0.08);
+}
+body.dark-theme .settings-popup-item:hover {
+  background-color: rgba(255, 172, 234, 0.08);
+}
+
+.settings-popup-item span.material-symbols-outlined {
+  font-size: 20px;
+  color: var(--md-sys-color-on-surface-variant);
 }
 
 /* ============================================

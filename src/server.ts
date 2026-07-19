@@ -264,6 +264,30 @@ app.delete('/api/vocabularies/:id', async (req: Request, res: Response) => {
   }
 });
 
+// 11. Export backup data (JSON)
+app.get('/api/backup/export', async (req: Request, res: Response) => {
+  try {
+    const data = await dbAdapter.exportData();
+    res.json(data);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// 12. Import backup data (JSON)
+app.post('/api/backup/import', async (req: Request, res: Response) => {
+  try {
+    const data = req.body;
+    if (!data || !Array.isArray(data.topics) || !Array.isArray(data.vocabularies)) {
+      return res.status(400).json({ error: 'Invalid backup data structure.' });
+    }
+    await dbAdapter.importData(data);
+    res.json({ message: 'Backup restored successfully.' });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Catch-all route to serve the Single Page Application
 app.get('*', (req: Request, res: Response) => {
   res.sendFile(path.join(__dirname, '../public/index.html'));

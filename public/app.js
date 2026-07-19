@@ -54,13 +54,11 @@ function toggleTheme() {
 
 // Update the theme icon text
 function updateThemeIcons(isDark) {
-  const toggleBtn = document.getElementById('railThemeToggleBtn');
-  if (toggleBtn) {
-    const icon = toggleBtn.querySelector('span');
-    if (icon) {
-      icon.textContent = isDark ? 'light_mode' : 'dark_mode';
-    }
-  }
+  const settingsIcon = document.getElementById('settings-theme-icon');
+  const drawerIcon = document.getElementById('drawer-theme-icon');
+  
+  if (settingsIcon) settingsIcon.textContent = isDark ? 'light_mode' : 'dark_mode';
+  if (drawerIcon) drawerIcon.textContent = isDark ? 'light_mode' : 'dark_mode';
 }
 
 // Navigation Drawer control functions
@@ -78,8 +76,104 @@ function closeNav() {
   if (scrim) scrim.classList.remove('active');
 }
 
+// Settings Popup control
+function toggleSettingsPopup(event) {
+  if (event) event.stopPropagation();
+  const popup = document.getElementById('settingsPopup');
+  if (popup) popup.classList.toggle('active');
+}
+
+function closeSettingsPopup() {
+  const popup = document.getElementById('settingsPopup');
+  if (popup) popup.classList.remove('active');
+}
+
+// Document click to close settings popup when clicking outside
+document.addEventListener('click', (e) => {
+  const popup = document.getElementById('settingsPopup');
+  const btn = document.getElementById('railSettingsBtn');
+  if (popup && popup.classList.contains('active')) {
+    if (!popup.contains(e.target) && (!btn || !btn.contains(e.target))) {
+      popup.classList.remove('active');
+    }
+  }
+});
+
+// Export study progress to JSON
+async function exportProgress() {
+  try {
+    const res = await fetch('/api/backup/export');
+    if (!res.ok) throw new Error('Không thể xuất dữ liệu từ máy chủ.');
+    const data = await res.json();
+    
+    const jsonString = `data:text/json;charset=utf-8,${encodeURIComponent(JSON.stringify(data, null, 2))}`;
+    const downloadAnchor = document.createElement('a');
+    const dateStr = new Date().toISOString().split('T')[0];
+    
+    downloadAnchor.setAttribute('href', jsonString);
+    downloadAnchor.setAttribute('download', `langcurve_backup_${dateStr}.json`);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
+  } catch (err) {
+    alert(`Lỗi khi xuất dữ liệu: ${err.message}`);
+  }
+}
+
+// Trigger hidden file input click
+function triggerImportFile() {
+  const fileInput = document.getElementById('import-file-input');
+  if (fileInput) fileInput.click();
+}
+
+// Handle selected backup file and upload
+function handleImportFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  
+  const reader = new FileReader();
+  reader.onload = async function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      
+      if (!data || !Array.isArray(data.topics) || !Array.isArray(data.vocabularies)) {
+        alert('Định dạng file sao lưu không hợp lệ. File phải chứa danh sách topics và vocabularies.');
+        return;
+      }
+      
+      const userConfirm = confirm(
+        `⚠️ CẢNH BÁO: Hành động này sẽ XÓA SẠCH toàn bộ dữ liệu từ vựng hiện tại của bạn và ghi đè bằng dữ liệu trong file backup.\n\nBạn có chắc chắn muốn phục hồi tiến trình?`
+      );
+      
+      if (!userConfirm) return;
+      
+      const res = await fetch('/api/backup/import', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      
+      if (res.ok) {
+        alert('Phục hồi tiến trình thành công!');
+        window.location.reload();
+      } else {
+        const errData = await res.json();
+        throw new Error(errData.error || 'Có lỗi xảy ra trên server.');
+      }
+    } catch (err) {
+      alert(`Lỗi khi nhập dữ liệu: ${err.message}`);
+    } finally {
+      event.target.value = ''; // reset file input
+    }
+  };
+  reader.readAsText(file);
+}
+
 // Navigation Routing function
 function navigateTo(viewName, params = {}) {
+  // Close any open settings popups
+  closeSettingsPopup();
+
   // Hide all sections
   document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
 

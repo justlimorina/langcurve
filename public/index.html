@@ -65,9 +65,25 @@
     </div>
 
     <div class="md-nav-rail__bottom">
-      <button class="theme-toggle-btn" id="railThemeToggleBtn" aria-label="Toggle dark mode" onclick="toggleTheme()">
-        <span class="material-symbols-outlined">dark_mode</span>
+      <button class="theme-toggle-btn" id="railSettingsBtn" aria-label="Settings" onclick="toggleSettingsPopup(event)">
+        <span class="material-symbols-outlined">settings</span>
       </button>
+      
+      <!-- Settings Popup Menu (Desktop only) -->
+      <div class="settings-popup" id="settingsPopup">
+        <button class="settings-popup-item" onclick="toggleTheme();">
+          <span class="material-symbols-outlined" id="settings-theme-icon">dark_mode</span>
+          <span>Chuyển giao diện</span>
+        </button>
+        <button class="settings-popup-item" onclick="exportProgress();">
+          <span class="material-symbols-outlined">download</span>
+          <span>Xuất tiến trình (JSON)</span>
+        </button>
+        <button class="settings-popup-item" onclick="triggerImportFile();">
+          <span class="material-symbols-outlined">upload</span>
+          <span>Nhập tiến trình (JSON)</span>
+        </button>
+      </div>
     </div>
   </aside>
 
@@ -82,7 +98,7 @@
       </span>
     </div>
 
-    <div class="md-nav-drawer__content">
+    <div class="md-nav-drawer__content" style="flex: 1;">
       <p class="md-nav-drawer__headline">Điều hướng</p>
       <div class="md-nav-drawer__list">
         <a href="#" class="md-nav-item active" id="nav-dashboard" onclick="navigateTo('dashboard'); closeNav(); return false;">
@@ -103,6 +119,27 @@
         <a href="#" class="md-nav-item" id="nav-practice" onclick="navigateTo('practice'); closeNav(); return false;">
           <span class="material-symbols-outlined">fitness_center</span>
           <span class="md-nav-item__label">Practice</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="md-nav-drawer__footer">
+      <hr style="border: none; border-top: 1px solid var(--md-sys-color-outline-variant); margin: 8px 12px 16px;">
+      <p class="md-nav-drawer__headline">Thiết lập</p>
+      <div class="md-nav-drawer__list">
+        <a href="#" class="md-nav-item" id="drawerThemeToggleBtn" onclick="toggleTheme(); return false;">
+          <span class="material-symbols-outlined" id="drawer-theme-icon">dark_mode</span>
+          <span class="md-nav-item__label">Chuyển giao diện</span>
+        </a>
+
+        <a href="#" class="md-nav-item" onclick="exportProgress(); closeNav(); return false;">
+          <span class="material-symbols-outlined">download</span>
+          <span class="md-nav-item__label">Xuất tiến trình (JSON)</span>
+        </a>
+
+        <a href="#" class="md-nav-item" onclick="triggerImportFile(); closeNav(); return false;">
+          <span class="material-symbols-outlined">upload</span>
+          <span class="md-nav-item__label">Nhập tiến trình (JSON)</span>
         </a>
       </div>
     </div>
@@ -295,6 +332,8 @@
       <md-filled-button onclick="document.getElementById('edit-example-form').requestSubmit()">Lưu câu ví dụ</md-filled-button>
     </div>
   </md-dialog>
+
+  <input type="file" id="import-file-input" style="display: none;" accept=".json" onchange="handleImportFile(event)">
 
   <script src="app.js"></script>
 </body>

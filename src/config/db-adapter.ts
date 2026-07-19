@@ -39,6 +39,8 @@ export interface IDbAdapter {
   deleteVocabulary(vocabId: number): Promise<any>;
   recordSrsReview(word: string, quality: number, topicId?: number): Promise<any>;
   getLearningCurve(): Promise<any[]>;
+  exportData(): Promise<any>;
+  importData(data: any): Promise<void>;
 }
 
 export interface ICacheAdapter {
@@ -421,6 +423,155 @@ class DbAdapter implements IDbAdapter {
       correctReviews: val.count,
       wrongReviews: 0
     })).sort((a, b) => a.date.localeCompare(b.date));
+  }
+
+  async exportData(): Promise<any> {
+    if (dbMode === 'PRODUCTION') {
+      try {
+        const user = await prisma.user.findUnique({ where: { id: 1 } });
+        const topics = await prisma.topic.findMany();
+        const vocabularies = await prisma.progress.findMany();
+        return {
+          xp: user?.xp || 0,
+          topics: topics.map(t => ({ id: t.id, name: t.name, description: t.description })),
+          vocabularies: vocabularies.map(v => ({
+            id: v.id,
+            topicId: v.topicId,
+            word: v.word,
+            definition: v.definition,
+            partOfSpeech: v.partOfSpeech,
+            phoneticUk: v.phoneticUk,
+            audioUrlUk: v.audioUrlUk,
+            phoneticUs: v.phoneticUs,
+            audioUrlUs: v.audioUrlUs,
+            userExample: v.userExample,
+            easiness: v.easiness,
+            interval: v.interval,
+            repetitions: v.repetitions,
+            dueDate: v.dueDate.toISOString(),
+            correctCount: v.correctCount,
+            wrongCount: v.wrongCount
+          }))
+        };
+      } catch (e) {
+        this.fallbackToDevMode();
+      }
+    }
+    const userRow = await sqliteDb!.get('SELECT xp FROM users WHERE id = 1');
+    const topics = await sqliteDb!.all('SELECT * FROM topics');
+    const vocabs = await sqliteDb!.all('SELECT * FROM vocabularies');
+    return {
+      xp: userRow?.xp || 0,
+      topics: topics.map((t: any) => ({ id: t.id, name: t.name, description: t.description })),
+      vocabularies: vocabs.map((v: any) => ({
+        id: v.id,
+        topicId: v.topic_id,
+        word: v.word,
+        definition: v.definition || '',
+        partOfSpeech: v.part_of_speech || '',
+        phoneticUk: v.phonetic_uk || null,
+        audioUrlUk: v.audio_url_uk || null,
+        phoneticUs: v.phonetic_us || null,
+        audioUrlUs: v.audio_url_us || null,
+        userExample: v.user_example,
+        easiness: v.easiness || 2.5,
+        interval: v.interval || 0,
+        repetitions: v.repetitions || 0,
+        dueDate: new Date(v.due_date || Date.now()).toISOString()
+      }))
+    };
+  }
+
+  async importData(data: any): Promise<void> {
+    const { xp, topics, vocabularies } = data;
+    
+    if (dbMode === 'PRODUCTION') {
+      try {
+        await prisma.$transaction([
+          prisma.progress.deleteMany(),
+          prisma.topic.deleteMany()
+        ]);
+        
+        await prisma.user.upsert({
+          where: { id: 1 },
+          update: { xp: xp || 0 },
+          create: { id: 1, email: 'user@langcurve.com', password: 'no-password', xp: xp || 0 }
+        });
+
+        const topicIdMap = new Map<number, number>();
+        for (const topic of topics) {
+          const createdTopic = await prisma.topic.create({
+            data: { name: topic.name, description: topic.description }
+          });
+          topicIdMap.set(topic.id, createdTopic.id);
+        }
+
+        for (const v of vocabularies) {
+          const newTopicId = topicIdMap.get(v.topicId);
+          if (!newTopicId) continue;
+          await prisma.progress.create({
+            data: {
+              userId: 1,
+              topicId: newTopicId,
+              word: v.word,
+              definition: v.definition || '',
+              partOfSpeech: v.partOfSpeech || '',
+              phoneticUk: v.phoneticUk || null,
+              audioUrlUk: v.audioUrlUk || null,
+              phoneticUs: v.phoneticUs || null,
+              audioUrlUs: v.audioUrlUs || null,
+              userExample: v.userExample || null,
+              easiness: v.easiness || 2.5,
+              interval: v.interval || 0,
+              repetitions: v.repetitions || 0,
+              dueDate: new Date(v.dueDate || Date.now()),
+              correctCount: v.correctCount || 0,
+              wrongCount: v.wrongCount || 0
+            }
+          });
+        }
+        return;
+      } catch (e) {
+        this.fallbackToDevMode();
+      }
+    }
+    
+    await sqliteDb!.run('DELETE FROM vocabularies');
+    await sqliteDb!.run('DELETE FROM topics');
+    
+    await sqliteDb!.run('INSERT OR REPLACE INTO users (id, xp) VALUES (1, ?)', [xp || 0]);
+    
+    const topicIdMap = new Map<number, number>();
+    for (const topic of topics) {
+      const res = await sqliteDb!.run(
+        'INSERT INTO topics (name, description) VALUES (?, ?)',
+        [topic.name, topic.description || null]
+      );
+      topicIdMap.set(topic.id, res.lastID!);
+    }
+    
+    for (const v of vocabularies) {
+      const newTopicId = topicIdMap.get(v.topicId);
+      if (!newTopicId) continue;
+      await sqliteDb!.run(
+        'INSERT INTO vocabularies (topic_id, word, definition, part_of_speech, phonetic_uk, audio_url_uk, phonetic_us, audio_url_us, user_example, easiness, interval, repetitions, due_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        [
+          newTopicId,
+          v.word,
+          v.definition || '',
+          v.partOfSpeech || '',
+          v.phoneticUk || null,
+          v.audioUrlUk || null,
+          v.phoneticUs || null,
+          v.audioUrlUs || null,
+          v.userExample || null,
+          v.easiness || 2.5,
+          v.interval || 0,
+          v.repetitions || 0,
+          new Date(v.dueDate || Date.now()).toISOString()
+        ]
+      );
+    }
   }
 
   private fallbackToDevMode() {
