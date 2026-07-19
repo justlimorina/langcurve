@@ -113,7 +113,7 @@ app.get('/api/topics/:id/vocabularies', async (req: Request, res: Response) => {
               phonetic = entry.phonetic || '';
               partOfSpeech = entry.meanings?.[0]?.partOfSpeech || '';
               definition = entry.meanings?.[0]?.definitions?.[0]?.definition || 'No definition available.';
-              
+
               const audioEntry = entry.phonetics?.find((p: any) => p.audio && p.audio !== '');
               if (audioEntry) audioUrl = audioEntry.audio;
             }
@@ -170,12 +170,12 @@ app.post('/api/vocabularies', async (req: Request, res: Response) => {
   try {
     const topicId = parseInt(topic_id);
     const progress = await dbAdapter.upsertVocabulary(
-      topicId, 
-      word, 
-      user_example, 
-      definition, 
-      part_of_speech, 
-      phonetic, 
+      topicId,
+      word,
+      user_example,
+      definition,
+      part_of_speech,
+      phonetic,
       audio_url
     );
     res.status(201).json(progress);

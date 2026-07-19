@@ -5,10 +5,10 @@ const state = {
   topics: [],
   vocabularies: [],
   stats: { total_topics: 0, total_words: 0, total_examples: 0 },
-  
+
   // Dictionary search state
   dictionaryResult: null,
-  
+
   // Practice state
   studyWords: [],
   studyIndex: 0,
@@ -232,7 +232,7 @@ function renderDictionaryResults(apiData) {
 
   // Ensure topics are loaded for save dialog
   if (state.topics.length === 0) {
-    fetch('/api/topics').then(r => r.json()).then(t => { state.topics = t; }).catch(() => {});
+    fetch('/api/topics').then(r => r.json()).then(t => { state.topics = t; }).catch(() => { });
   }
 
   // Build Word Header
@@ -630,14 +630,14 @@ async function deleteVocabulary(id) {
 // ============================================
 async function initPracticeView() {
   const container = document.getElementById('practice-container');
-  
+
   if (state.practiceTopicId === null) {
     container.innerHTML = '<div class="spinner"></div>';
     try {
       const topicsRes = await fetch('/api/topics');
       if (!topicsRes.ok) throw new Error('Không thể tải dữ liệu chủ đề');
       const topics = await topicsRes.json();
-      
+
       let html = `
         <div class="practice-selector-container" style="animation: fadeIn 0.25s ease;">
           <h3 style="font-family: var(--font-display); font-size: 1.3rem; font-weight: 700; margin: 0 0 8px 0; color: var(--md-sys-color-primary);">Chọn chủ đề để ôn tập</h3>
@@ -652,7 +652,7 @@ async function initPracticeView() {
               <p style="font-size: 0.85rem; margin: 0; line-height: 1.4; flex: 1; opacity: 0.9;">Ôn tập tất cả từ vựng đang có của bạn từ tất cả các chủ đề trộn lẫn.</p>
             </div>
       `;
-      
+
       topics.forEach(t => {
         html += `
             <div class="practice-topic-card" onclick="selectPracticeTopic(${t.id}, '${escapeJsString(t.name)}')" style="background-color: var(--md-sys-color-surface-container-lowest); border: 1px solid var(--md-sys-color-outline-variant); border-radius: var(--radius-md); padding: 20px; cursor: pointer; display: flex; flex-direction: column; gap: 8px;">
@@ -665,12 +665,12 @@ async function initPracticeView() {
             </div>
         `;
       });
-      
+
       html += `
           </div>
         </div>
       `;
-      
+
       container.innerHTML = html;
     } catch (error) {
       container.innerHTML = `<p style="color: var(--md-sys-color-error); text-align: center;">Lỗi khi tải chủ đề ôn tập: ${error.message}</p>`;
@@ -917,11 +917,11 @@ async function executeSavePracticeSentence(sentence) {
   const feedbackMsg = document.getElementById('feedback-message');
   const actionsRow = document.getElementById('practice-actions-row');
   const v = state.studyWords[state.studyIndex];
-  
+
   if (textarea) textarea.disabled = true;
   if (actionsRow) actionsRow.style.display = 'none';
   if (validationDiv) validationDiv.style.display = 'none';
-  
+
   try {
     const saveRes = await fetch(`/api/vocabularies/${v.id}/example`, {
       method: 'PUT',
@@ -938,7 +938,7 @@ async function executeSavePracticeSentence(sentence) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ word: v.word, quality: 5, topic_id: v.topic_id })
     });
-    
+
     if (!srsRes.ok) throw new Error('Không thể cập nhật tiến trình SRS');
 
     feedbackMsg.innerHTML = `
