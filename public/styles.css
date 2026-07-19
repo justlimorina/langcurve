@@ -918,3 +918,18 @@ md-dialog {
   border-color: var(--md-sys-color-primary) !important;
 }
 
+.dict-audio-btn-small {
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 2px;
+  color: var(--md-sys-color-on-surface-variant);
+  display: inline-flex;
+  align-items: center;
+  transition: color 0.15s ease;
+}
+
+.dict-audio-btn-small:hover {
+  color: var(--md-sys-color-primary);
+}
+

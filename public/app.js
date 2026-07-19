@@ -188,6 +188,58 @@ async function searchDictionary() {
   }
 }
 
+function extractUkUsPhonetics(entry) {
+  let ukText = '';
+  let ukAudio = '';
+  let usText = '';
+  let usAudio = '';
+
+  if (entry.phonetics && entry.phonetics.length > 0) {
+    const ukPhonetic = entry.phonetics.find(p => {
+      const audioUrl = (p.audio || '').toLowerCase();
+      const textVal = (p.text || '').toLowerCase();
+      return audioUrl.includes('-uk') || audioUrl.includes('/uk/') || textVal.includes('uk');
+    });
+    const usPhonetic = entry.phonetics.find(p => {
+      const audioUrl = (p.audio || '').toLowerCase();
+      const textVal = (p.text || '').toLowerCase();
+      return audioUrl.includes('-us') || audioUrl.includes('/us/') || textVal.includes('us');
+    });
+
+    if (ukPhonetic) {
+      ukText = ukPhonetic.text || '';
+      ukAudio = ukPhonetic.audio || '';
+    }
+    if (usPhonetic) {
+      usText = usPhonetic.text || '';
+      usAudio = usPhonetic.audio || '';
+    }
+
+    if (!ukAudio && !usAudio) {
+      const firstWithAudio = entry.phonetics.find(p => p.audio);
+      if (firstWithAudio) {
+        ukAudio = firstWithAudio.audio;
+        ukText = firstWithAudio.text || entry.phonetic || '';
+        usAudio = firstWithAudio.audio;
+        usText = firstWithAudio.text || entry.phonetic || '';
+      }
+    }
+    
+    if (!ukText) {
+      const firstWithText = entry.phonetics.find(p => p.text);
+      ukText = firstWithText ? firstWithText.text : (entry.phonetic || '');
+    }
+    if (!usText) {
+      usText = ukText;
+    }
+  } else {
+    ukText = entry.phonetic || '';
+    usText = entry.phonetic || '';
+  }
+
+  return { ukText, ukAudio, usText, usAudio };
+}
+
 function renderDictionaryResults(apiData) {
   const resultArea = document.getElementById('search-result-area');
   resultArea.innerHTML = '';
@@ -196,25 +248,16 @@ function renderDictionaryResults(apiData) {
   const entry = apiData[0];
   const word = entry.word;
 
-  // Extract phonetic & audio
-  let phonetic = entry.phonetic || '';
-  let audioUrl = '';
-
-  if (entry.phonetics && entry.phonetics.length > 0) {
-    const withAudio = entry.phonetics.find(p => p.audio && p.audio !== '');
-    if (withAudio) {
-      audioUrl = withAudio.audio;
-      if (!phonetic && withAudio.text) phonetic = withAudio.text;
-    }
-    if (!phonetic) {
-      const withText = entry.phonetics.find(p => p.text && p.text !== '');
-      if (withText) phonetic = withText.text;
-    }
-  }
+  const phonetics = extractUkUsPhonetics(entry);
 
   // Store result globally
   state.dictionaryResult = {
-    word, phonetic, audio_url: audioUrl, definitions: []
+    word, 
+    phonetic_uk: phonetics.ukText, 
+    audio_url_uk: phonetics.ukAudio, 
+    phonetic_us: phonetics.usText, 
+    audio_url_us: phonetics.usAudio, 
+    definitions: []
   };
 
   let defIndex = 0;
@@ -234,13 +277,6 @@ function renderDictionaryResults(apiData) {
   if (state.topics.length === 0) {
     fetch('/api/topics').then(r => r.json()).then(t => { state.topics = t; }).catch(() => { });
   }
-
-  // Build Word Header
-  const audioBtn = audioUrl
-    ? `<button class="dict-audio-btn" onclick="playAudio('${audioUrl}')" title="Nghe phát âm">
-         <span class="material-symbols-outlined" style="font-size: 28px;">volume_up</span>
-       </button>`
-    : '';
 
   // Build Definition Cards (horizontal grid per wireframe)
   let defCardsHtml = '';
@@ -277,11 +313,19 @@ function renderDictionaryResults(apiData) {
       <div style="display: flex; align-items: flex-start; justify-content: space-between;">
         <div>
           <h1 class="dict-word-title">${escapeHtml(word)}</h1>
-          <div class="dict-word-meta">
-            <span class="dict-phonetic">${escapeHtml(phonetic)}</span>
+          <div class="dict-word-meta" style="display:flex; flex-direction:column; gap:6px; margin-top:8px;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="font-size:0.75rem; font-weight:600; background:var(--md-sys-color-secondary-container); color:var(--md-sys-color-on-secondary-container); padding:2px 6px; border-radius:4px;">🇬🇧 UK</span>
+              <span class="dict-phonetic">${escapeHtml(phonetics.ukText)}</span>
+              ${phonetics.ukAudio ? `<button class="dict-audio-btn-small" onclick="playAudio('${phonetics.ukAudio}')" title="Nghe giọng UK"><span class="material-symbols-outlined" style="font-size:18px; vertical-align:middle;">volume_up</span></button>` : ''}
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="font-size:0.75rem; font-weight:600; background:var(--md-sys-color-tertiary-container); color:var(--md-sys-color-on-tertiary-container); padding:2px 6px; border-radius:4px;">🇺🇸 US</span>
+              <span class="dict-phonetic">${escapeHtml(phonetics.usText)}</span>
+              ${phonetics.usAudio ? `<button class="dict-audio-btn-small" onclick="playAudio('${phonetics.usAudio}')" title="Nghe giọng US"><span class="material-symbols-outlined" style="font-size:18px; vertical-align:middle;">volume_up</span></button>` : ''}
+            </div>
           </div>
         </div>
-        ${audioBtn}
       </div>
     </div>
 
@@ -403,10 +447,12 @@ async function handleSaveDefinition(defIndex) {
   const payload = {
     topic_id: parseInt(topicId),
     word: state.dictionaryResult.word,
-    phonetic: state.dictionaryResult.phonetic,
-    audio_url: state.dictionaryResult.audio_url,
     definition: def.definition,
     part_of_speech: def.part_of_speech,
+    phonetic_uk: state.dictionaryResult.phonetic_uk,
+    audio_url_uk: state.dictionaryResult.audio_url_uk,
+    phonetic_us: state.dictionaryResult.phonetic_us,
+    audio_url_us: state.dictionaryResult.audio_url_us,
     user_example: def.example || null
   };
 
@@ -561,12 +607,6 @@ async function loadTopicDetails(topicId) {
       const vocabCard = document.createElement('div');
       vocabCard.className = 'vocab-card';
 
-      const audioBtnHtml = vocab.audio_url
-        ? `<md-icon-button onclick="playAudio('${vocab.audio_url}')" title="Phát âm">
-             <span class="material-symbols-outlined">volume_up</span>
-           </md-icon-button>`
-        : '';
-
       let exampleHtml = '';
       if (vocab.user_example) {
         exampleHtml = `
@@ -593,9 +633,21 @@ async function loadTopicDetails(topicId) {
           <span class="vocab-word-title">${escapeHtml(vocab.word)}</span>
           ${vocab.part_of_speech ? `<span class="vocab-pos-badge">${escapeHtml(vocab.part_of_speech)}</span>` : ''}
         </div>
-        <div style="display:flex; align-items:center; gap:4px;">
-          <span class="vocab-phonetic">${escapeHtml(vocab.phonetic || '')}</span>
-          ${audioBtnHtml}
+        <div style="display:flex; flex-direction:column; gap:4px; margin: 6px 0; text-align:left;">
+          <div style="display:flex; align-items:center; gap:6px; font-size:0.8rem;">
+            <span style="font-weight:600; color:var(--md-sys-color-primary);">UK:</span>
+            <span class="vocab-phonetic">${escapeHtml(vocab.phonetic_uk || '')}</span>
+            ${vocab.audio_url_uk ? `
+              <span class="material-symbols-outlined" style="font-size:14px; cursor:pointer; color:var(--md-sys-color-primary);" onclick="playAudio('${vocab.audio_url_uk}')" title="Nghe UK">volume_up</span>
+            ` : ''}
+          </div>
+          <div style="display:flex; align-items:center; gap:6px; font-size:0.8rem;">
+            <span style="font-weight:600; color:var(--md-sys-color-tertiary);">US:</span>
+            <span class="vocab-phonetic">${escapeHtml(vocab.phonetic_us || '')}</span>
+            ${vocab.audio_url_us ? `
+              <span class="material-symbols-outlined" style="font-size:14px; cursor:pointer; color:var(--md-sys-color-tertiary);" onclick="playAudio('${vocab.audio_url_us}')" title="Nghe US">volume_up</span>
+            ` : ''}
+          </div>
         </div>
         <p class="vocab-definition">${escapeHtml(vocab.definition)}</p>
         ${exampleHtml}
@@ -750,16 +802,28 @@ function renderPracticeCard() {
         </div>
         
         <div class="study-card-front" style="padding-bottom: 8px;">
-          <div class="practice-word-display" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+          <div class="practice-word-display" style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px;">
             <div>
               <span style="font-size: 1.8rem; font-weight: 700; font-family: var(--font-display); color: var(--md-sys-color-primary);">${escapeHtml(v.word)}</span>
               ${v.part_of_speech ? `<span class="vocab-pos-badge" style="margin-left: 8px; vertical-align: middle;">${escapeHtml(v.part_of_speech)}</span>` : ''}
+              
+              <div style="display:flex; flex-direction:column; gap:4px; margin-top:8px; text-align:left;">
+                <div style="display:flex; align-items:center; gap:6px; font-size:0.85rem;">
+                  <span style="font-weight:600; color:var(--md-sys-color-primary);">UK:</span>
+                  <span class="vocab-phonetic">${escapeHtml(v.phonetic_uk || '')}</span>
+                  ${v.audio_url_uk ? `
+                    <span class="material-symbols-outlined" style="font-size:16px; cursor:pointer; color:var(--md-sys-color-primary);" onclick="playAudio('${v.audio_url_uk}')" title="Nghe UK">volume_up</span>
+                  ` : ''}
+                </div>
+                <div style="display:flex; align-items:center; gap:6px; font-size:0.85rem;">
+                  <span style="font-weight:600; color:var(--md-sys-color-tertiary);">US:</span>
+                  <span class="vocab-phonetic">${escapeHtml(v.phonetic_us || '')}</span>
+                  ${v.audio_url_us ? `
+                    <span class="material-symbols-outlined" style="font-size:16px; cursor:pointer; color:var(--md-sys-color-tertiary);" onclick="playAudio('${v.audio_url_us}')" title="Nghe US">volume_up</span>
+                  ` : ''}
+                </div>
+              </div>
             </div>
-            ${v.audio_url ? `
-              <md-icon-button onclick="playAudio('${v.audio_url}')" title="Nghe phát âm">
-                <span class="material-symbols-outlined">volume_up</span>
-              </md-icon-button>
-            ` : ''}
           </div>
           
           <p class="definition-text" style="margin: 8px 0; font-size: 1.05rem;"><strong>Định nghĩa:</strong> "${escapeHtml(v.definition)}"</p>

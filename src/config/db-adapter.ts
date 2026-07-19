@@ -30,8 +30,10 @@ export interface IDbAdapter {
     userExample?: string, 
     definition?: string, 
     partOfSpeech?: string, 
-    phonetic?: string, 
-    audioUrl?: string
+    phoneticUk?: string, 
+    audioUrlUk?: string,
+    phoneticUs?: string, 
+    audioUrlUs?: string
   ): Promise<any>;
   updateExample(vocabId: number, userExample?: string): Promise<any>;
   deleteVocabulary(vocabId: number): Promise<any>;
@@ -224,8 +226,10 @@ class DbAdapter implements IDbAdapter {
       word: r.word,
       definition: r.definition || '',
       partOfSpeech: r.part_of_speech || '',
-      phonetic: r.phonetic || null,
-      audioUrl: r.audio_url || null,
+      phoneticUk: r.phonetic_uk || null,
+      audioUrlUk: r.audio_url_uk || null,
+      phoneticUs: r.phonetic_us || null,
+      audioUrlUs: r.audio_url_us || null,
       userExample: r.user_example,
       easiness: r.easiness || 2.5,
       interval: r.interval || 0,
@@ -240,8 +244,10 @@ class DbAdapter implements IDbAdapter {
     userExample?: string,
     definition?: string,
     partOfSpeech?: string,
-    phonetic?: string,
-    audioUrl?: string
+    phoneticUk?: string,
+    audioUrlUk?: string,
+    phoneticUs?: string,
+    audioUrlUs?: string
   ): Promise<any> {
     if (dbMode === 'PRODUCTION') {
       try {
@@ -251,8 +257,10 @@ class DbAdapter implements IDbAdapter {
             userExample: userExample ? userExample.trim() : undefined,
             definition: definition ? definition.trim() : undefined,
             partOfSpeech: partOfSpeech ? partOfSpeech.trim() : undefined,
-            phonetic: phonetic || undefined,
-            audioUrl: audioUrl || undefined
+            phoneticUk: phoneticUk || undefined,
+            audioUrlUk: audioUrlUk || undefined,
+            phoneticUs: phoneticUs || undefined,
+            audioUrlUs: audioUrlUs || undefined
           },
           create: { 
             userId: 1, 
@@ -261,8 +269,10 @@ class DbAdapter implements IDbAdapter {
             userExample: userExample ? userExample.trim() : null,
             definition: definition ? definition.trim() : '',
             partOfSpeech: partOfSpeech ? partOfSpeech.trim() : '',
-            phonetic: phonetic || null,
-            audioUrl: audioUrl || null
+            phoneticUk: phoneticUk || null,
+            audioUrlUk: audioUrlUk || null,
+            phoneticUs: phoneticUs || null,
+            audioUrlUs: audioUrlUs || null
           }
         });
       } catch (e) {
@@ -272,28 +282,32 @@ class DbAdapter implements IDbAdapter {
     const existing = await sqliteDb!.get('SELECT id FROM vocabularies WHERE topic_id = ? AND word = ?', [topicId, word.trim().toLowerCase()]);
     if (existing) {
       await sqliteDb!.run(
-        'UPDATE vocabularies SET user_example = ?, definition = ?, part_of_speech = ?, phonetic = ?, audio_url = ? WHERE id = ?',
+        'UPDATE vocabularies SET user_example = ?, definition = ?, part_of_speech = ?, phonetic_uk = ?, audio_url_uk = ?, phonetic_us = ?, audio_url_us = ? WHERE id = ?',
         [
           userExample ? userExample.trim() : null,
           definition ? definition.trim() : '',
           partOfSpeech ? partOfSpeech.trim() : '',
-          phonetic || null,
-          audioUrl || null,
+          phoneticUk || null,
+          audioUrlUk || null,
+          phoneticUs || null,
+          audioUrlUs || null,
           existing.id
         ]
       );
       return { id: existing.id, topicId, word: word.trim().toLowerCase(), userExample };
     } else {
       const res = await sqliteDb!.run(
-        'INSERT INTO vocabularies (topic_id, word, user_example, definition, part_of_speech, phonetic, audio_url, easiness, interval, repetitions, due_date) VALUES (?, ?, ?, ?, ?, ?, ?, 2.5, 0, 0, ?)',
+        'INSERT INTO vocabularies (topic_id, word, user_example, definition, part_of_speech, phonetic_uk, audio_url_uk, phonetic_us, audio_url_us, easiness, interval, repetitions, due_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 2.5, 0, 0, ?)',
         [
           topicId, 
           word.trim().toLowerCase(), 
           userExample ? userExample.trim() : null, 
           definition ? definition.trim() : '',
           partOfSpeech ? partOfSpeech.trim() : '',
-          phonetic || null,
-          audioUrl || null,
+          phoneticUk || null,
+          audioUrlUk || null,
+          phoneticUs || null,
+          audioUrlUs || null,
           new Date().toISOString()
         ]
       );
@@ -444,8 +458,10 @@ export async function initializeSqliteFallback() {
       word TEXT,
       definition TEXT DEFAULT '',
       part_of_speech TEXT DEFAULT '',
-      phonetic TEXT,
-      audio_url TEXT,
+      phonetic_uk TEXT,
+      audio_url_uk TEXT,
+      phonetic_us TEXT,
+      audio_url_us TEXT,
       user_example TEXT,
       easiness REAL DEFAULT 2.5,
       interval INTEGER DEFAULT 0,
@@ -459,12 +475,14 @@ export async function initializeSqliteFallback() {
     );
   `);
 
-  // Schema check & upgrade for existing databases
+  // Schema check & upgrade for existing databases to support UK/US dialect pronunciations
   try {
     const tableInfo = await sqliteDb.all("PRAGMA table_info(vocabularies)");
-    const hasDefinition = tableInfo.some((col: any) => col.name === 'definition');
-    if (!hasDefinition) {
-      console.log('Migrating SQLite database schema to support per-topic definitions and unique constraints...');
+    const hasPhoneticUk = tableInfo.some((col: any) => col.name === 'phonetic_uk');
+    if (!hasPhoneticUk) {
+      console.log('Migrating SQLite database schema to support UK/US phonetic & audio...');
+      const hasOldPhonetic = tableInfo.some((col: any) => col.name === 'phonetic');
+      
       await sqliteDb.exec(`
         ALTER TABLE vocabularies RENAME TO vocabularies_old;
         
@@ -474,8 +492,10 @@ export async function initializeSqliteFallback() {
           word TEXT,
           definition TEXT DEFAULT '',
           part_of_speech TEXT DEFAULT '',
-          phonetic TEXT,
-          audio_url TEXT,
+          phonetic_uk TEXT,
+          audio_url_uk TEXT,
+          phonetic_us TEXT,
+          audio_url_us TEXT,
           user_example TEXT,
           easiness REAL DEFAULT 2.5,
           interval INTEGER DEFAULT 0,
@@ -483,13 +503,22 @@ export async function initializeSqliteFallback() {
           due_date TEXT,
           UNIQUE(topic_id, word)
         );
-        
-        INSERT INTO vocabularies (id, topic_id, word, user_example, easiness, interval, repetitions, due_date, definition, part_of_speech, phonetic, audio_url)
-        SELECT id, topic_id, word, user_example, easiness, interval, repetitions, due_date, '', '', '', '' FROM vocabularies_old;
-        
-        DROP TABLE vocabularies_old;
       `);
-      console.log('SQLite database schema migration completed successfully.');
+
+      if (hasOldPhonetic) {
+        await sqliteDb.exec(`
+          INSERT INTO vocabularies (id, topic_id, word, definition, part_of_speech, user_example, easiness, interval, repetitions, due_date, phonetic_uk, audio_url_uk, phonetic_us, audio_url_us)
+          SELECT id, topic_id, word, definition, part_of_speech, user_example, easiness, interval, repetitions, due_date, phonetic, audio_url, '', '' FROM vocabularies_old;
+        `);
+      } else {
+        await sqliteDb.exec(`
+          INSERT INTO vocabularies (id, topic_id, word, definition, part_of_speech, user_example, easiness, interval, repetitions, due_date, phonetic_uk, audio_url_uk, phonetic_us, audio_url_us)
+          SELECT id, topic_id, word, definition, part_of_speech, user_example, easiness, interval, repetitions, due_date, '', '', '', '' FROM vocabularies_old;
+        `);
+      }
+      
+      await sqliteDb.exec(`DROP TABLE vocabularies_old;`);
+      console.log('SQLite database schema migration for UK/US columns completed successfully.');
     }
   } catch (e) {
     console.error('Failed to verify or upgrade SQLite schema:', e);

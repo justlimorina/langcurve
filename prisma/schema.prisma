@@ -36,8 +36,10 @@ model Progress {
   word         String
   definition   String   @default("")
   partOfSpeech String   @default("")
-  phonetic     String?
-  audioUrl     String?
+  phoneticUk   String?
+  audioUrlUk   String?
+  phoneticUs   String?
+  audioUrlUs   String?
   userExample  String?
   easiness     Float    @default(2.5) // EF in SM-2
   interval     Int      @default(0)   // interval in days

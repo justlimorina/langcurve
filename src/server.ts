@@ -99,10 +99,12 @@ app.get('/api/topics/:id/vocabularies', async (req: Request, res: Response) => {
     // Prioritize definition fields from database; perform online fallback only if empty
     const enrichedVocabularies = await Promise.all(
       vocabularies.map(async (v) => {
-        let phonetic = v.phonetic || '';
+        let phoneticUk = v.phoneticUk || '';
+        let audioUrlUk = v.audioUrlUk || '';
+        let phoneticUs = v.phoneticUs || '';
+        let audioUrlUs = v.audioUrlUs || '';
         let definition = v.definition || 'No definition available.';
         let partOfSpeech = v.partOfSpeech || '';
-        let audioUrl = v.audioUrl || '';
 
         // Fallback for old database rows lacking stored definition fields
         if (!v.definition || v.definition.trim() === '') {
@@ -110,12 +112,14 @@ app.get('/api/topics/:id/vocabularies', async (req: Request, res: Response) => {
             const dictInfo = await dictionaryService.lookupWord(v.word);
             if (dictInfo && dictInfo[0]) {
               const entry = dictInfo[0];
-              phonetic = entry.phonetic || '';
-              partOfSpeech = entry.meanings?.[0]?.partOfSpeech || '';
               definition = entry.meanings?.[0]?.definitions?.[0]?.definition || 'No definition available.';
-
-              const audioEntry = entry.phonetics?.find((p: any) => p.audio && p.audio !== '');
-              if (audioEntry) audioUrl = audioEntry.audio;
+              partOfSpeech = entry.meanings?.[0]?.partOfSpeech || '';
+              
+              const extracted = extractUkUsPhoneticsBackend(entry);
+              phoneticUk = extracted.phoneticUk;
+              audioUrlUk = extracted.audioUrlUk;
+              phoneticUs = extracted.phoneticUs;
+              audioUrlUs = extracted.audioUrlUs;
             }
           } catch (err) {
             console.warn(`Failed to fetch online fallback definition for "${v.word}":`, err);
@@ -126,8 +130,10 @@ app.get('/api/topics/:id/vocabularies', async (req: Request, res: Response) => {
           id: v.id,
           topic_id: v.topicId,
           word: v.word,
-          phonetic,
-          audio_url: audioUrl,
+          phonetic_uk: phoneticUk,
+          audio_url_uk: audioUrlUk,
+          phonetic_us: phoneticUs,
+          audio_url_us: audioUrlUs,
           definition,
           part_of_speech: partOfSpeech,
           user_example: v.userExample,
@@ -275,3 +281,56 @@ async function startServer() {
 }
 
 startServer();
+
+function extractUkUsPhoneticsBackend(dictEntry: any) {
+  let phoneticUk = '';
+  let audioUrlUk = '';
+  let phoneticUs = '';
+  let audioUrlUs = '';
+
+  if (dictEntry && dictEntry.phonetics && dictEntry.phonetics.length > 0) {
+    const uk = dictEntry.phonetics.find((p: any) => {
+      const audio = (p.audio || '').toLowerCase();
+      const text = (p.text || '').toLowerCase();
+      return audio.includes('-uk') || audio.includes('/uk/') || text.includes('uk');
+    });
+    const us = dictEntry.phonetics.find((p: any) => {
+      const audio = (p.audio || '').toLowerCase();
+      const text = (p.text || '').toLowerCase();
+      return audio.includes('-us') || audio.includes('/us/') || text.includes('us');
+    });
+
+    if (uk) {
+      phoneticUk = uk.text || '';
+      audioUrlUk = uk.audio || '';
+    }
+    if (us) {
+      phoneticUs = us.text || '';
+      audioUrlUs = us.audio || '';
+    }
+
+    if (!audioUrlUk && !audioUrlUs) {
+      const first = dictEntry.phonetics.find((p: any) => p.audio);
+      if (first) {
+        audioUrlUk = first.audio;
+        phoneticUk = first.text || dictEntry.phonetic || '';
+        audioUrlUs = first.audio;
+        phoneticUs = first.text || dictEntry.phonetic || '';
+      }
+    }
+
+    if (!phoneticUk) {
+      const firstText = dictEntry.phonetics.find((p: any) => p.text);
+      phoneticUk = firstText ? firstText.text : (dictEntry.phonetic || '');
+    }
+    if (!phoneticUs) {
+      phoneticUs = phoneticUk;
+    }
+  } else if (dictEntry) {
+    phoneticUk = dictEntry.phonetic || '';
+    phoneticUs = dictEntry.phonetic || '';
+  }
+
+  return { phoneticUk, audioUrlUk, phoneticUs, audioUrlUs };
+}
+
