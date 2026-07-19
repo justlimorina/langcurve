@@ -453,12 +453,12 @@ function renderDictionaryResults(apiData) {
       const idx = state.dictionaryResult.definitions.findIndex(
         d => d.part_of_speech === meaning.partOfSpeech && d.definition === def.definition
       );
-      const exampleHtml = def.example ? `<p class="def-card-example" style="font-size:0.85rem; color:var(--primary-tint-90); margin:8px 0; font-style:italic; line-height:1.4;">e.g. ${escapeHtml(def.example)}</p>` : '';
+      const exampleHtml = def.example ? `<p class="def-card-example" style="font-size:0.85rem; color:var(--md-sys-color-on-primary-container); opacity:0.8; margin:8px 0; font-style:italic; line-height:1.4;">e.g. ${escapeHtml(def.example)}</p>` : '';
       defCardsHtml += `
         <div class="def-card">
           <h4 class="def-card-pos">{${escapeHtml(meaning.partOfSpeech)}}</h4>
           <p class="def-card-meaning">${escapeHtml(def.definition)}</p>
-          <div class="def-card-meaning-vi" id="def-vi-${idx}" style="font-size:0.85rem; color:var(--primary-tint-80); margin:6px 0; font-style:italic; opacity:0.95; display:flex; align-items:center; gap:6px;">
+          <div class="def-card-meaning-vi" id="def-vi-${idx}" style="font-size:0.85rem; color:var(--md-sys-color-on-primary-container); opacity:0.85; margin:6px 0; font-style:italic; display:flex; align-items:center; gap:6px;">
             <span class="spinner-small"></span> Đang dịch...
           </div>
           ${exampleHtml}

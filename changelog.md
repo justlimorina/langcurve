@@ -1,5 +1,6 @@
 [19/07/2026]
 CẬP NHẬT:
+- Sửa lỗi tương phản màu chữ tiếng Việt (dịch tự động) và ví dụ tiếng Anh trong các thẻ nghĩa từ điển để hiển thị sắc nét trên cả Light và Dark Theme.
 - Tích hợp menu Cài đặt (Settings) trực quan ở chân của Navigation Rail (Desktop) và Navigation Drawer (Mobile) bao gồm các thiết lập: chuyển đổi theme, xuất/nhập tiến trình JSON.
 - Triển khai tính năng Sao lưu (Export) và Phục hồi (Import) tiến độ học tập (XP, chủ đề, từ vựng) dưới dạng file JSON tĩnh mà không cần tài khoản, đi kèm cơ chế cảnh báo ghi đè dữ liệu.
 - Thiết kế lại giao diện điều hướng thích ứng theo chuẩn Material Design 3: Thay thế sidebar tĩnh cũ bằng Navigation Rail (Desktop) và Navigation Drawer di động + Scrim backdrop + Mobile AppBar.
