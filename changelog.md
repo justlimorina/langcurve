@@ -5,6 +5,7 @@ CẬP NHẬT:
 - Sửa lỗi không thể xóa topic.
 - Khắc phục lỗi trùng từ ở nhiều chủ đề khác nhau (Notebook fix): Cho phép lưu một từ vào nhiều chủ đề với định nghĩa cụ thể khác nhau; nâng cấp cơ sở dữ liệu (Prisma & SQLite migrations) và tối ưu hóa tốc độ tải trang.
 - Tích hợp công cụ phân tích và kiểm tra lỗi ngữ pháp/cấu trúc câu ví dụ (Grammar Checker) thông qua LanguageTool API khi người dùng tự đặt câu trong phần Ôn tập.
+- Phân tách và đối chứng phiên âm IPA & file phát âm (audio) của giọng Anh-Anh (🇬🇧 UK) và Anh-Mỹ (🇺🇸 US) song song trên các giao diện: Tra từ điển, Notebook và thẻ Ôn tập (Practice).
 - Cập nhật lại API.
 # API ĐÃ SỬ DỤNG:
 - API dịch nghĩa: https://api.mymemory.translated.net/get

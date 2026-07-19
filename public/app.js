@@ -215,6 +215,21 @@ function extractUkUsPhonetics(entry) {
       usAudio = usPhonetic.audio || '';
     }
 
+    // If one is missing, try to find another phonetic card with text to fill the other slot
+    if (ukPhonetic && !usPhonetic) {
+      const other = entry.phonetics.find(p => p !== ukPhonetic && p.text);
+      if (other) {
+        usText = other.text || '';
+        usAudio = other.audio || '';
+      }
+    } else if (usPhonetic && !ukPhonetic) {
+      const other = entry.phonetics.find(p => p !== usPhonetic && p.text);
+      if (other) {
+        ukText = other.text || '';
+        ukAudio = other.audio || '';
+      }
+    }
+
     if (!ukAudio && !usAudio) {
       const firstWithAudio = entry.phonetics.find(p => p.audio);
       if (firstWithAudio) {
@@ -230,7 +245,8 @@ function extractUkUsPhonetics(entry) {
       ukText = firstWithText ? firstWithText.text : (entry.phonetic || '');
     }
     if (!usText) {
-      usText = ukText;
+      const secondWithText = entry.phonetics.find(p => p.text && p.text !== ukText);
+      usText = secondWithText ? secondWithText.text : ukText;
     }
   } else {
     ukText = entry.phonetic || '';

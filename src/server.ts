@@ -168,7 +168,17 @@ app.get('/api/dictionary/lookup', async (req: Request, res: Response) => {
 
 // 6. Save imported word to database
 app.post('/api/vocabularies', async (req: Request, res: Response) => {
-  const { topic_id, word, user_example, definition, part_of_speech, phonetic, audio_url } = req.body;
+  const { 
+    topic_id, 
+    word, 
+    user_example, 
+    definition, 
+    part_of_speech, 
+    phonetic_uk, 
+    audio_url_uk, 
+    phonetic_us, 
+    audio_url_us 
+  } = req.body;
   if (!topic_id || !word) {
     return res.status(400).json({ error: 'topic_id and word are required fields.' });
   }
@@ -181,8 +191,10 @@ app.post('/api/vocabularies', async (req: Request, res: Response) => {
       user_example,
       definition,
       part_of_speech,
-      phonetic,
-      audio_url
+      phonetic_uk,
+      audio_url_uk,
+      phonetic_us,
+      audio_url_us
     );
     res.status(201).json(progress);
   } catch (error: any) {
@@ -309,6 +321,21 @@ function extractUkUsPhoneticsBackend(dictEntry: any) {
       audioUrlUs = us.audio || '';
     }
 
+    // Try finding alternative elements to fill in the missing slots
+    if (uk && !us) {
+      const other = dictEntry.phonetics.find((p: any) => p !== uk && p.text);
+      if (other) {
+        phoneticUs = other.text || '';
+        audioUrlUs = other.audio || '';
+      }
+    } else if (us && !uk) {
+      const other = dictEntry.phonetics.find((p: any) => p !== us && p.text);
+      if (other) {
+        phoneticUk = other.text || '';
+        audioUrlUk = other.audio || '';
+      }
+    }
+
     if (!audioUrlUk && !audioUrlUs) {
       const first = dictEntry.phonetics.find((p: any) => p.audio);
       if (first) {
@@ -324,7 +351,8 @@ function extractUkUsPhoneticsBackend(dictEntry: any) {
       phoneticUk = firstText ? firstText.text : (dictEntry.phonetic || '');
     }
     if (!phoneticUs) {
-      phoneticUs = phoneticUk;
+      const secondText = dictEntry.phonetics.find((p: any) => p.text && p.text !== phoneticUk);
+      phoneticUs = secondText ? secondText.text : phoneticUk;
     }
   } else if (dictEntry) {
     phoneticUk = dictEntry.phonetic || '';
