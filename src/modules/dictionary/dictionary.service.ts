@@ -93,8 +93,17 @@ export class DictionaryService {
     let resultPayload: any = null;
     let apiSource = '';
 
+    // Enriched Free Dictionary API (Main free source)
+    try {
+      resultPayload = await this.fetchEnrichedFreeDictionary(lemma);
+      apiSource = 'freedictionary-enriched';
+      console.log(`[API Fetch Success] Enriched Free Dictionary: ${lemma}`);
+    } catch (error) {
+      console.warn('Enriched Free Dictionary failed, trying next fallback...', error);
+    }
+
     // Oxford Dictionary API
-    if (process.env.OXFORD_APP_ID && process.env.OXFORD_APP_KEY) {
+    if (!resultPayload && process.env.OXFORD_APP_ID && process.env.OXFORD_APP_KEY) {
       try {
         resultPayload = await this.fetchFromOxford(lemma);
         apiSource = 'oxford';
@@ -113,13 +122,25 @@ export class DictionaryService {
       }
     }
 
-    // Public Free Dictionary API (Absolute fallback for zero-keys development)
+    // Public Free Dictionary API (Raw fallback if enrichment had issues)
     if (!resultPayload) {
       try {
         resultPayload = await this.fetchFromFreeDictionary(lemma);
         apiSource = 'freedictionary';
+        console.log(`[API Fetch Success] Free Dictionary API (Raw): ${lemma}`);
       } catch (error) {
-        console.error('Free Dictionary API Call failed.', error);
+        console.error('Free Dictionary API Call failed, trying next fallback...', error);
+      }
+    }
+
+    // Google Translate TTS Fallback (Absolute fallback)
+    if (!resultPayload) {
+      try {
+        resultPayload = this.fetchFromGoogleTTS(lemma);
+        apiSource = 'google-tts';
+        console.log(`[API Fetch Success] Google TTS Fallback: ${lemma}`);
+      } catch (error) {
+        console.error('Google TTS Fallback failed.', error);
         throw new Error(`Word "${word}" definition could not be resolved from any dictionary APIs.`);
       }
     }
@@ -138,6 +159,131 @@ export class DictionaryService {
     }
 
     return resultPayload;
+  }
+
+  private async fetchEnrichedFreeDictionary(lemma: string): Promise<any> {
+    const url = `https://api.dictionaryapi.dev/api/v2/entries/en/${lemma}`;
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`Free Dictionary API error status ${response.status}`);
+    
+    const data = await response.json();
+    if (!Array.isArray(data) || data.length === 0) {
+      throw new Error('Invalid response from Free Dictionary API');
+    }
+
+    const entry = data[0];
+    let phoneticUk = '';
+    let audioUrlUk = '';
+    let phoneticUs = '';
+    let audioUrlUs = '';
+
+    if (entry.phonetics && entry.phonetics.length > 0) {
+      const ukPhonetic = entry.phonetics.find((p: any) => {
+        const audioUrl = (p.audio || '').toLowerCase();
+        const textVal = (p.text || '').toLowerCase();
+        return audioUrl.includes('-uk') || audioUrl.includes('/uk/') || textVal.includes('uk');
+      });
+      const usPhonetic = entry.phonetics.find((p: any) => {
+        const audioUrl = (p.audio || '').toLowerCase();
+        const textVal = (p.text || '').toLowerCase();
+        return audioUrl.includes('-us') || audioUrl.includes('/us/') || textVal.includes('us');
+      });
+
+      if (ukPhonetic) {
+        phoneticUk = ukPhonetic.text || '';
+        audioUrlUk = ukPhonetic.audio || '';
+      }
+      if (usPhonetic) {
+        phoneticUs = usPhonetic.text || '';
+        audioUrlUs = usPhonetic.audio || '';
+      }
+
+      // If one is missing, try to find another phonetic card with text to fill the other slot
+      if (ukPhonetic && !usPhonetic) {
+        const other = entry.phonetics.find((p: any) => p !== ukPhonetic && p.text);
+        if (other) {
+          phoneticUs = other.text || '';
+          audioUrlUs = other.audio || '';
+        }
+      } else if (usPhonetic && !ukPhonetic) {
+        const other = entry.phonetics.find((p: any) => p !== usPhonetic && p.text);
+        if (other) {
+          phoneticUk = other.text || '';
+          audioUrlUk = other.audio || '';
+        }
+      }
+
+      // If still no audio, get first available
+      if (!audioUrlUk && !audioUrlUs) {
+        const firstWithAudio = entry.phonetics.find((p: any) => p.audio);
+        if (firstWithAudio) {
+          audioUrlUk = firstWithAudio.audio;
+          audioUrlUs = firstWithAudio.audio;
+        }
+      }
+
+      // Fill in text
+      if (!phoneticUk) {
+        const firstWithText = entry.phonetics.find((p: any) => p.text);
+        phoneticUk = firstWithText ? firstWithText.text : (entry.phonetic || '');
+      }
+      if (!phoneticUs) {
+        const secondWithText = entry.phonetics.find((p: any) => p.text && p.text !== phoneticUk);
+        phoneticUs = secondWithText ? secondWithText.text : phoneticUk;
+      }
+    }
+
+    // Google TTS Fallback for missing audio urls (append ?dialect=-uk/-us to match backend/frontend regex)
+    if (!audioUrlUk) {
+      audioUrlUk = `https://translate.google.com/translate_tts?ie=UTF-8&tl=en-GB&client=tw-ob&q=${encodeURIComponent(lemma)}?dialect=-uk`;
+    } else if (!audioUrlUk.includes('dialect=')) {
+      audioUrlUk = audioUrlUk + (audioUrlUk.includes('?') ? '&' : '?') + 'dialect=-uk';
+    }
+
+    if (!audioUrlUs) {
+      audioUrlUs = `https://translate.google.com/translate_tts?ie=UTF-8&tl=en-US&client=tw-ob&q=${encodeURIComponent(lemma)}?dialect=-us`;
+    } else if (!audioUrlUs.includes('dialect=')) {
+      audioUrlUs = audioUrlUs + (audioUrlUs.includes('?') ? '&' : '?') + 'dialect=-us';
+    }
+
+    // Standardize the phonetics array for frontend compatibility
+    entry.phonetics = [
+      { text: phoneticUk, audio: audioUrlUk },
+      { text: phoneticUs, audio: audioUrlUs }
+    ];
+    entry.phonetic = phoneticUk || phoneticUs || entry.phonetic || '';
+
+    return [entry];
+  }
+
+  private fetchFromGoogleTTS(lemma: string): any {
+    return [
+      {
+        word: lemma,
+        phonetics: [
+          {
+            text: '/uk/',
+            audio: `https://translate.google.com/translate_tts?ie=UTF-8&tl=en-GB&client=tw-ob&q=${encodeURIComponent(lemma)}?dialect=-uk`
+          },
+          {
+            text: '/us/',
+            audio: `https://translate.google.com/translate_tts?ie=UTF-8&tl=en-US&client=tw-ob&q=${encodeURIComponent(lemma)}?dialect=-us`
+          }
+        ],
+        meanings: [
+          {
+            partOfSpeech: 'vocabulary',
+            definitions: [
+              {
+                definition: 'No definition available. (Google TTS fallback)',
+                example: ''
+              }
+            ]
+          }
+        ],
+        source: 'google-tts'
+      }
+    ];
   }
 
   private async fetchFromOxford(lemma: string): Promise<any> {

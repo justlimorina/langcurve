@@ -1,3 +1,7 @@
+[20/07/2026]
+CẬP NHẬT:
+- Tối ưu hóa nguồn phát âm UK/US: Nâng cấp lên Enriched Free Dictionary API tích hợp tự động phát âm chất lượng cao từ Wiktionary và cơ chế tự động fallback thông minh sang Google Translate Text-to-Speech (TTS) cho cả hai dialect UK và US. Nhờ đó đảm bảo 100% từ vựng tra cứu đều có đầy đủ phiên âm và phát âm chuẩn của cả hai giọng.
+
 [19/07/2026]
 CẬP NHẬT:
 - Sửa lỗi tương phản màu chữ tiếng Việt (dịch tự động) và ví dụ tiếng Anh trong các thẻ nghĩa từ điển để hiển thị sắc nét trên cả Light và Dark Theme.

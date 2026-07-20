@@ -545,5 +545,146 @@
       }
     ],
     "createdAt": "2026-07-16T13:27:15.903Z"
+  },
+  "ubiquitous": {
+    "source": "freedictionary",
+    "rawPayload": [
+      {
+        "word": "ubiquitous",
+        "phonetics": [
+          {
+            "audio": "https://api.dictionaryapi.dev/media/pronunciations/en/ubiquitous-au.mp3",
+            "sourceUrl": "https://commons.wikimedia.org/w/index.php?curid=75859043",
+            "license": {
+              "name": "BY-SA 4.0",
+              "url": "https://creativecommons.org/licenses/by-sa/4.0"
+            }
+          },
+          {
+            "text": "/juːˈbɪk.wə.təs/",
+            "audio": "https://api.dictionaryapi.dev/media/pronunciations/en/ubiquitous-uk.mp3",
+            "sourceUrl": "https://commons.wikimedia.org/w/index.php?curid=583119"
+          },
+          {
+            "text": "/juˈbɪk.wɪ.təs/",
+            "audio": "https://api.dictionaryapi.dev/media/pronunciations/en/ubiquitous-us.mp3",
+            "sourceUrl": "https://commons.wikimedia.org/w/index.php?curid=811935",
+            "license": {
+              "name": "BY-SA 3.0",
+              "url": "https://creativecommons.org/licenses/by-sa/3.0"
+            }
+          }
+        ],
+        "meanings": [
+          {
+            "partOfSpeech": "adjective",
+            "definitions": [
+              {
+                "definition": "Being everywhere at once: omnipresent.",
+                "synonyms": [
+                  "omnipresent"
+                ],
+                "antonyms": [],
+                "example": "To Hindus, Jews, Christians, and Muslims, God is ubiquitous."
+              },
+              {
+                "definition": "Appearing to be everywhere at once; being or seeming to be in more than one location at the same time.",
+                "synonyms": [
+                  "ever-present"
+                ],
+                "antonyms": []
+              },
+              {
+                "definition": "Widespread; very prevalent.",
+                "synonyms": [
+                  "common",
+                  "pervasive"
+                ],
+                "antonyms": []
+              }
+            ],
+            "synonyms": [
+              "common",
+              "pervasive",
+              "ever-present",
+              "omnipresent"
+            ],
+            "antonyms": []
+          }
+        ],
+        "license": {
+          "name": "CC BY-SA 3.0",
+          "url": "https://creativecommons.org/licenses/by-sa/3.0"
+        },
+        "sourceUrls": [
+          "https://en.wiktionary.org/wiki/ubiquitous"
+        ]
+      }
+    ],
+    "createdAt": "2026-07-20T01:02:47.252Z"
+  },
+  "metaphor": {
+    "source": "freedictionary-enriched",
+    "rawPayload": [
+      {
+        "word": "metaphor",
+        "phonetic": "/ˈmɛt.ə.fɔː(ɹ)/",
+        "phonetics": [
+          {
+            "text": "/ˈmɛt.ə.fɔː(ɹ)/",
+            "audio": "https://api.dictionaryapi.dev/media/pronunciations/en/metaphor-uk.mp3?dialect=-uk"
+          },
+          {
+            "text": "/ˈme.tə.fɚ/",
+            "audio": "https://api.dictionaryapi.dev/media/pronunciations/en/metaphor-us.mp3?dialect=-us"
+          }
+        ],
+        "meanings": [
+          {
+            "partOfSpeech": "noun",
+            "definitions": [
+              {
+                "definition": "The use of a word or phrase to refer to something that it is not, invoking a direct similarity between the word or phrase used and the thing described (but in the case of English without the words like or as, since use of those words would imply a simile); the word or phrase used in this way; an implied comparison.",
+                "synonyms": [],
+                "antonyms": []
+              },
+              {
+                "definition": "The use of an everyday object or concept to represent an underlying facet of the computer and thus aid users in performing tasks.",
+                "synonyms": [],
+                "antonyms": [],
+                "example": "desktop metaphor; wastebasket metaphor"
+              }
+            ],
+            "synonyms": [],
+            "antonyms": []
+          },
+          {
+            "partOfSpeech": "verb",
+            "definitions": [
+              {
+                "definition": "To use a metaphor.",
+                "synonyms": [],
+                "antonyms": []
+              },
+              {
+                "definition": "To describe by means of a metaphor.",
+                "synonyms": [],
+                "antonyms": []
+              }
+            ],
+            "synonyms": [],
+            "antonyms": []
+          }
+        ],
+        "license": {
+          "name": "CC BY-SA 3.0",
+          "url": "https://creativecommons.org/licenses/by-sa/3.0"
+        },
+        "sourceUrls": [
+          "https://en.wiktionary.org/wiki/metaphor"
+        ]
+      }
+    ],
+    "createdAt": "2026-07-20T01:03:45.104Z"
   }
 }
