@@ -97,7 +97,7 @@ export class DictionaryService {
 
 #### C. Tóm tắt cuối phiên (Mandatory Recap) và Yêu cầu sau khi kiểm tra (Post-check Requirement)
 
-Kết thúc mỗi câu trả lời hoặc sau khi giải quyết xong một luồng logic, AI Agent BẮT BUỘC phải ngắt ngay phiên làm việc của server (nếu có sử dụng), sau đó cung cấp một bảng tóm tắt trạng thái (Status Checklist) sử dụng Markdown.
+Kết thúc mỗi câu trả lời hoặc sau khi giải quyết xong một luồng logic, AI Agent BẮT BUỘC phải ngắt ngay phiên làm việc của server (nếu có sử dụng), viết thay đổi vào changelog.md, sau đó cung cấp một bảng tóm tắt trạng thái (Status Checklist) sử dụng Markdown.
 
 **Định dạng tóm tắt:**
 
