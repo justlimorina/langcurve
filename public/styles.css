@@ -1280,3 +1280,116 @@ md-dialog {
   color: var(--md-sys-color-primary);
 }
 
+/* ============================================
+   CEFR BADGE STYLING
+   ============================================ */
+.cefr-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #ffffff !important;
+  text-transform: uppercase;
+  text-align: center;
+  line-height: 1.4;
+  vertical-align: middle;
+}
+.cefr-badge.a1 { background-color: #2e7d32; } /* Dark Green */
+.cefr-badge.a2 { background-color: #43a047; } /* Medium Green */
+.cefr-badge.b1 { background-color: #1976d2; } /* Blue */
+.cefr-badge.b2 { background-color: #3f51b5; } /* Indigo */
+.cefr-badge.c1 { background-color: #f57c00; } /* Orange */
+.cefr-badge.c2 { background-color: #d81b60; } /* Pink/Crimson */
+
+/* ============================================
+   VIDEO CAROUSEL / GRID STYLING
+   ============================================ */
+.video-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+  margin-top: 12px;
+}
+.video-card {
+  background-color: var(--md-sys-color-surface-container-lowest);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  display: flex;
+  flex-direction: column;
+}
+.video-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--md-sys-elevation-level1);
+  border-color: var(--md-sys-color-primary);
+}
+.video-thumbnail-container {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+}
+.video-thumbnail-container iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+.video-details {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+.video-details h4 {
+  font-family: var(--font-display);
+  font-size: 0.92rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--md-sys-color-on-surface);
+  line-height: 1.4;
+}
+.video-details p {
+  font-size: 0.8rem;
+  color: var(--md-sys-color-on-surface-variant);
+  margin: 0;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ============================================
+   SYNONYMS & ANTONYMS DISPLAY
+   ============================================ */
+.vocab-relations {
+  margin-top: 8px;
+  font-size: 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border-top: 1px dashed var(--md-sys-color-outline-variant);
+  padding-top: 6px;
+}
+.relation-row {
+  display: flex;
+  gap: 6px;
+  line-height: 1.4;
+}
+.relation-label {
+  font-weight: 600;
+  color: var(--md-sys-color-primary);
+}
+.relation-label.ant {
+  color: var(--md-sys-color-tertiary);
+}
+.relation-value {
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+

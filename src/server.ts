@@ -140,7 +140,10 @@ app.get('/api/topics/:id/vocabularies', async (req: Request, res: Response) => {
           easiness: v.easiness,
           interval: v.interval,
           repetitions: v.repetitions,
-          dueDate: v.dueDate
+          dueDate: v.dueDate,
+          cefr_level: v.cefrLevel || null,
+          synonyms: v.synonyms || null,
+          antonyms: v.antonyms || null
         };
       })
     );
@@ -177,7 +180,10 @@ app.post('/api/vocabularies', async (req: Request, res: Response) => {
     phonetic_uk, 
     audio_url_uk, 
     phonetic_us, 
-    audio_url_us 
+    audio_url_us,
+    cefr_level,
+    synonyms,
+    antonyms
   } = req.body;
   if (!topic_id || !word) {
     return res.status(400).json({ error: 'topic_id and word are required fields.' });
@@ -194,7 +200,10 @@ app.post('/api/vocabularies', async (req: Request, res: Response) => {
       phonetic_uk,
       audio_url_uk,
       phonetic_us,
-      audio_url_us
+      audio_url_us,
+      cefr_level,
+      synonyms,
+      antonyms
     );
     res.status(201).json(progress);
   } catch (error: any) {

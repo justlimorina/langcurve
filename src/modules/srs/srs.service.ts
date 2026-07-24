@@ -109,6 +109,21 @@ export class SrsService {
       }
     });
 
+    // Save historical log to PostgreSQL
+    try {
+      await prisma.reviewLog.create({
+        data: {
+          userId,
+          word,
+          quality,
+          easiness: sm2Result.easiness,
+          interval: sm2Result.interval
+        }
+      });
+    } catch (e) {
+      console.warn('Failed to record production review log:', e);
+    }
+
     // Award XP in production
     const xpReward = quality === 5 ? 20 : (quality >= 3 ? 10 : 0);
     if (xpReward > 0) {

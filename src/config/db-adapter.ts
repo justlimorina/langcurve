@@ -33,7 +33,10 @@ export interface IDbAdapter {
     phoneticUk?: string, 
     audioUrlUk?: string,
     phoneticUs?: string, 
-    audioUrlUs?: string
+    audioUrlUs?: string,
+    cefrLevel?: string,
+    synonyms?: string,
+    antonyms?: string
   ): Promise<any>;
   updateExample(vocabId: number, userExample?: string): Promise<any>;
   deleteVocabulary(vocabId: number): Promise<any>;
@@ -236,7 +239,10 @@ class DbAdapter implements IDbAdapter {
       easiness: r.easiness || 2.5,
       interval: r.interval || 0,
       repetitions: r.repetitions || 0,
-      dueDate: new Date(r.due_date || Date.now())
+      dueDate: new Date(r.due_date || Date.now()),
+      cefrLevel: r.cefr_level || null,
+      synonyms: r.synonyms || null,
+      antonyms: r.antonyms || null
     }));
   }
 
@@ -249,7 +255,10 @@ class DbAdapter implements IDbAdapter {
     phoneticUk?: string,
     audioUrlUk?: string,
     phoneticUs?: string,
-    audioUrlUs?: string
+    audioUrlUs?: string,
+    cefrLevel?: string,
+    synonyms?: string,
+    antonyms?: string
   ): Promise<any> {
     if (dbMode === 'PRODUCTION') {
       try {
@@ -262,7 +271,10 @@ class DbAdapter implements IDbAdapter {
             phoneticUk: phoneticUk || undefined,
             audioUrlUk: audioUrlUk || undefined,
             phoneticUs: phoneticUs || undefined,
-            audioUrlUs: audioUrlUs || undefined
+            audioUrlUs: audioUrlUs || undefined,
+            cefrLevel: cefrLevel || undefined,
+            synonyms: synonyms || undefined,
+            antonyms: antonyms || undefined
           },
           create: { 
             userId: 1, 
@@ -274,7 +286,10 @@ class DbAdapter implements IDbAdapter {
             phoneticUk: phoneticUk || null,
             audioUrlUk: audioUrlUk || null,
             phoneticUs: phoneticUs || null,
-            audioUrlUs: audioUrlUs || null
+            audioUrlUs: audioUrlUs || null,
+            cefrLevel: cefrLevel || null,
+            synonyms: synonyms || null,
+            antonyms: antonyms || null
           }
         });
       } catch (e) {
@@ -284,7 +299,7 @@ class DbAdapter implements IDbAdapter {
     const existing = await sqliteDb!.get('SELECT id FROM vocabularies WHERE topic_id = ? AND word = ?', [topicId, word.trim().toLowerCase()]);
     if (existing) {
       await sqliteDb!.run(
-        'UPDATE vocabularies SET user_example = ?, definition = ?, part_of_speech = ?, phonetic_uk = ?, audio_url_uk = ?, phonetic_us = ?, audio_url_us = ? WHERE id = ?',
+        'UPDATE vocabularies SET user_example = ?, definition = ?, part_of_speech = ?, phonetic_uk = ?, audio_url_uk = ?, phonetic_us = ?, audio_url_us = ?, cefr_level = ?, synonyms = ?, antonyms = ? WHERE id = ?',
         [
           userExample ? userExample.trim() : null,
           definition ? definition.trim() : '',
@@ -293,13 +308,16 @@ class DbAdapter implements IDbAdapter {
           audioUrlUk || null,
           phoneticUs || null,
           audioUrlUs || null,
+          cefrLevel || null,
+          synonyms || null,
+          antonyms || null,
           existing.id
         ]
       );
       return { id: existing.id, topicId, word: word.trim().toLowerCase(), userExample };
     } else {
       const res = await sqliteDb!.run(
-        'INSERT INTO vocabularies (topic_id, word, user_example, definition, part_of_speech, phonetic_uk, audio_url_uk, phonetic_us, audio_url_us, easiness, interval, repetitions, due_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 2.5, 0, 0, ?)',
+        'INSERT INTO vocabularies (topic_id, word, user_example, definition, part_of_speech, phonetic_uk, audio_url_uk, phonetic_us, audio_url_us, easiness, interval, repetitions, due_date, cefr_level, synonyms, antonyms) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 2.5, 0, 0, ?, ?, ?, ?)',
         [
           topicId, 
           word.trim().toLowerCase(), 
@@ -310,7 +328,10 @@ class DbAdapter implements IDbAdapter {
           audioUrlUk || null,
           phoneticUs || null,
           audioUrlUs || null,
-          new Date().toISOString()
+          new Date().toISOString(),
+          cefrLevel || null,
+          synonyms || null,
+          antonyms || null
         ]
       );
       return { id: res.lastID, topicId, word: word.trim().toLowerCase(), userExample };
@@ -392,6 +413,11 @@ class DbAdapter implements IDbAdapter {
         'UPDATE vocabularies SET easiness = ?, repetitions = ?, interval = ?, due_date = ? WHERE id = ?',
         [nextEF, nextRepetitions, nextInterval, dueDate.toISOString(), row.id]
       );
+      // Ghi nhận lịch sử ôn tập vào SQLite review_logs
+      await sqliteDb!.run(
+        'INSERT INTO review_logs (user_id, word, quality, easiness, interval, created_at) VALUES (?, ?, ?, ?, ?, ?)',
+        [1, word.trim().toLowerCase(), quality, nextEF, nextInterval, new Date().toISOString()]
+      );
     }
     const xpReward = quality === 5 ? 20 : (quality >= 3 ? 10 : 0);
     if (xpReward > 0) {
@@ -409,19 +435,25 @@ class DbAdapter implements IDbAdapter {
         this.fallbackToDevMode();
       }
     }
-    const rows = await sqliteDb!.all('SELECT due_date, easiness FROM vocabularies');
-    const dayMap = new Map<string, { count: number; totalEF: number }>();
+    // Aggregate historical logs from SQLite review_logs
+    const rows = await sqliteDb!.all('SELECT created_at, quality, easiness FROM review_logs ORDER BY created_at ASC');
+    const dayMap = new Map<string, { count: number; totalEF: number; correct: number; wrong: number }>();
     for (const r of rows) {
-      const dateKey = new Date(r.due_date || Date.now()).toISOString().split('T')[0];
-      const existing = dayMap.get(dateKey) || { count: 0, totalEF: 0 };
-      dayMap.set(dateKey, { count: existing.count + 1, totalEF: existing.totalEF + (r.easiness || 2.5) });
+      const dateKey = new Date(r.created_at || Date.now()).toISOString().split('T')[0];
+      const existing = dayMap.get(dateKey) || { count: 0, totalEF: 0, correct: 0, wrong: 0 };
+      dayMap.set(dateKey, {
+        count: existing.count + 1,
+        totalEF: existing.totalEF + (r.easiness || 2.5),
+        correct: existing.correct + (r.quality >= 3 ? 1 : 0),
+        wrong: existing.wrong + (r.quality < 3 ? 1 : 0)
+      });
     }
     return Array.from(dayMap.entries()).map(([date, val]) => ({
       date,
       wordCount: val.count,
       avgEasiness: parseFloat((val.totalEF / val.count).toFixed(2)),
-      correctReviews: val.count,
-      wrongReviews: 0
+      correctReviews: val.correct,
+      wrongReviews: val.wrong
     })).sort((a, b) => a.date.localeCompare(b.date));
   }
 
@@ -450,7 +482,10 @@ class DbAdapter implements IDbAdapter {
             repetitions: v.repetitions,
             dueDate: v.dueDate.toISOString(),
             correctCount: v.correctCount,
-            wrongCount: v.wrongCount
+            wrongCount: v.wrongCount,
+            cefrLevel: v.cefrLevel,
+            synonyms: v.synonyms,
+            antonyms: v.antonyms
           }))
         };
       } catch (e) {
@@ -477,7 +512,10 @@ class DbAdapter implements IDbAdapter {
         easiness: v.easiness || 2.5,
         interval: v.interval || 0,
         repetitions: v.repetitions || 0,
-        dueDate: new Date(v.due_date || Date.now()).toISOString()
+        dueDate: new Date(v.due_date || Date.now()).toISOString(),
+        cefrLevel: v.cefr_level || null,
+        synonyms: v.synonyms || null,
+        antonyms: v.antonyms || null
       }))
     };
   }
@@ -489,7 +527,8 @@ class DbAdapter implements IDbAdapter {
       try {
         await prisma.$transaction([
           prisma.progress.deleteMany(),
-          prisma.topic.deleteMany()
+          prisma.topic.deleteMany(),
+          prisma.reviewLog.deleteMany()
         ]);
         
         await prisma.user.upsert({
@@ -526,7 +565,10 @@ class DbAdapter implements IDbAdapter {
               repetitions: v.repetitions || 0,
               dueDate: new Date(v.dueDate || Date.now()),
               correctCount: v.correctCount || 0,
-              wrongCount: v.wrongCount || 0
+              wrongCount: v.wrongCount || 0,
+              cefrLevel: v.cefrLevel || null,
+              synonyms: v.synonyms || null,
+              antonyms: v.antonyms || null
             }
           });
         }
@@ -538,6 +580,7 @@ class DbAdapter implements IDbAdapter {
     
     await sqliteDb!.run('DELETE FROM vocabularies');
     await sqliteDb!.run('DELETE FROM topics');
+    await sqliteDb!.run('DELETE FROM review_logs');
     
     await sqliteDb!.run('INSERT OR REPLACE INTO users (id, xp) VALUES (1, ?)', [xp || 0]);
     
@@ -554,7 +597,7 @@ class DbAdapter implements IDbAdapter {
       const newTopicId = topicIdMap.get(v.topicId);
       if (!newTopicId) continue;
       await sqliteDb!.run(
-        'INSERT INTO vocabularies (topic_id, word, definition, part_of_speech, phonetic_uk, audio_url_uk, phonetic_us, audio_url_us, user_example, easiness, interval, repetitions, due_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        'INSERT INTO vocabularies (topic_id, word, definition, part_of_speech, phonetic_uk, audio_url_uk, phonetic_us, audio_url_us, user_example, easiness, interval, repetitions, due_date, cefr_level, synonyms, antonyms) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
         [
           newTopicId,
           v.word,
@@ -568,7 +611,10 @@ class DbAdapter implements IDbAdapter {
           v.easiness || 2.5,
           v.interval || 0,
           v.repetitions || 0,
-          new Date(v.dueDate || Date.now()).toISOString()
+          new Date(v.dueDate || Date.now()).toISOString(),
+          v.cefrLevel || null,
+          v.synonyms || null,
+          v.antonyms || null
         ]
       );
     }
@@ -618,13 +664,42 @@ export async function initializeSqliteFallback() {
       interval INTEGER DEFAULT 0,
       repetitions INTEGER DEFAULT 0,
       due_date TEXT,
+      cefr_level TEXT,
+      synonyms TEXT,
+      antonyms TEXT,
       UNIQUE(topic_id, word)
+    );
+    CREATE TABLE IF NOT EXISTS review_logs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER,
+      word TEXT,
+      quality INTEGER,
+      easiness REAL,
+      interval INTEGER,
+      created_at TEXT
     );
     CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       xp INTEGER DEFAULT 0
     );
   `);
+
+  // Schema check & upgrade for cefr_level, synonyms, antonyms and review_logs table
+  try {
+    const tableInfo = await sqliteDb.all("PRAGMA table_info(vocabularies)");
+    const hasCefr = tableInfo.some((col: any) => col.name === 'cefr_level');
+    if (!hasCefr) {
+      console.log('Migrating SQLite database schema to support CEFR level, synonyms, and antonyms...');
+      await sqliteDb.exec(`
+        ALTER TABLE vocabularies ADD COLUMN cefr_level TEXT;
+        ALTER TABLE vocabularies ADD COLUMN synonyms TEXT;
+        ALTER TABLE vocabularies ADD COLUMN antonyms TEXT;
+      `);
+      console.log('SQLite database schema migration for CEFR and synonyms/antonyms completed successfully.');
+    }
+  } catch (e) {
+    console.error('Failed to verify or upgrade SQLite schema for CEFR/synonyms/antonyms:', e);
+  }
 
   // Schema check & upgrade for existing databases to support UK/US dialect pronunciations
   try {

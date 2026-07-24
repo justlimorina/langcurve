@@ -50,6 +50,10 @@ function toggleTheme() {
   const isDark = body.classList.contains('dark-theme');
   localStorage.setItem('theme', isDark ? 'dark' : 'light');
   updateThemeIcons(isDark);
+
+  if (state.currentView === 'dashboard') {
+    loadDashboard();
+  }
 }
 
 // Update the theme icon text
@@ -275,9 +279,172 @@ async function loadDashboard() {
         featuredEl.innerHTML = `<span class="stat-unit">Chưa có từ vựng</span>`;
       }
     }
+
+    // Fetch and render Chart.js for Curve Analytics
+    try {
+      const curveRes = await fetch('/api/analytics/curve');
+      if (curveRes.ok) {
+        const curveData = await curveRes.json();
+        renderLearningCurveChart(curveData);
+      }
+    } catch (err) {
+      console.error('Lỗi khi tải đường cong học tập:', err);
+    }
+
+    // Populate YouTube English educational videos
+    const videoArea = document.getElementById('dash-video-area');
+    if (videoArea) {
+      const videos = [
+        {
+          id: 'wP3A0_jOExA',
+          title: 'Học tiếng Anh giao tiếp cơ bản - BBC Learning English',
+          desc: 'Tổng hợp các mẫu câu giao tiếp thông dụng nhất trong cuộc sống hằng ngày giúp bạn tự tin giao tiếp.'
+        },
+        {
+          id: '2T7hJz9uL-M',
+          title: 'Bí quyết ghi nhớ từ vựng lâu dài - Spaced Repetition Science',
+          desc: 'Khoa học đằng sau phương pháp Lặp lại ngắt quãng (Spaced Repetition) và cách nó giúp thay đổi cách bạn ghi nhớ.'
+        },
+        {
+          id: 'tVpD657O1P0',
+          title: '5 mẹo cải thiện kỹ năng nói tiếng Anh trôi chảy',
+          desc: 'Phương pháp luyện nói hiệu quả tại nhà dành cho người bận rộn để tự tin nâng cao phản xạ tiếng Anh.'
+        }
+      ];
+
+      videoArea.innerHTML = videos.map(vid => `
+        <div class="video-card">
+          <div class="video-thumbnail-container">
+            <iframe src="https://www.youtube.com/embed/${vid.id}" allowfullscreen></iframe>
+          </div>
+          <div class="video-details">
+            <h4>${escapeHtml(vid.title)}</h4>
+            <p>${escapeHtml(vid.desc)}</p>
+          </div>
+        </div>
+      `).join('');
+    }
+
   } catch (error) {
     console.error('Dashboard load error:', error);
   }
+}
+
+let learningCurveChartInstance = null;
+function renderLearningCurveChart(data) {
+  const ctx = document.getElementById('learningCurveChart');
+  if (!ctx) return;
+
+  if (learningCurveChartInstance) {
+    learningCurveChartInstance.destroy();
+  }
+
+  const parent = ctx.parentElement;
+  if (!data || data.length === 0) {
+    // If chart instance existed, clear canvas and display empty message
+    ctx.style.display = 'none';
+    let emptyNotice = document.getElementById('chart-empty-notice');
+    if (!emptyNotice) {
+      emptyNotice = document.createElement('div');
+      emptyNotice.id = 'chart-empty-notice';
+      emptyNotice.style.cssText = 'display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:var(--md-sys-color-on-surface-variant); opacity:0.7;';
+      emptyNotice.innerHTML = `
+        <span class="material-symbols-outlined" style="font-size:48px;">monitoring</span>
+        <p style="margin-top:8px; font-size:0.9rem;">Chưa có dữ liệu ôn tập để vẽ biểu đồ. Hãy ôn tập từ vựng ở mục Practice!</p>
+      `;
+      parent.appendChild(emptyNotice);
+    } else {
+      emptyNotice.style.display = 'flex';
+    }
+    return;
+  }
+
+  // Hide empty notice and show canvas
+  const emptyNotice = document.getElementById('chart-empty-notice');
+  if (emptyNotice) emptyNotice.style.display = 'none';
+  ctx.style.display = 'block';
+
+  // Extract dates, wordCounts, and EF values
+  const labels = data.map(d => d.date);
+  const wordCounts = data.map(d => d.wordCount);
+  const avgEasiness = data.map(d => d.avgEasiness);
+
+  const isDark = document.body.classList.contains('dark-theme');
+  const primaryColor = isDark ? '#ffacea' : '#8d437f';
+  const accentColor = isDark ? '#dbbfd0' : '#6f5867';
+  const textColor = isDark ? '#eae0e3' : '#1f1a1d';
+  const gridColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
+
+  learningCurveChartInstance = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Số lượng từ đã ôn tập',
+          data: wordCounts,
+          borderColor: primaryColor,
+          backgroundColor: primaryColor + '20',
+          borderWidth: 3,
+          tension: 0.3,
+          fill: true,
+          yAxisID: 'y'
+        },
+        {
+          label: 'EF trung bình',
+          data: avgEasiness,
+          borderColor: '#815342',
+          backgroundColor: 'transparent',
+          borderWidth: 2,
+          borderDash: [5, 5],
+          tension: 0.1,
+          yAxisID: 'y1'
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          labels: {
+            color: textColor,
+            font: { family: 'Roboto' }
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: gridColor },
+          ticks: { color: textColor }
+        },
+        y: {
+          type: 'linear',
+          display: true,
+          position: 'left',
+          grid: { color: gridColor },
+          ticks: { color: textColor },
+          title: {
+            display: true,
+            text: 'Số từ',
+            color: textColor
+          }
+        },
+        y1: {
+          type: 'linear',
+          display: true,
+          position: 'right',
+          grid: { drawOnChartArea: false },
+          ticks: { color: textColor },
+          title: {
+            display: true,
+            text: 'Hệ số EF',
+            color: textColor
+          }
+        }
+      }
+    }
+  });
 }
 
 // ============================================
@@ -318,12 +485,13 @@ async function searchDictionary() {
   errorArea.style.display = 'none';
 
   try {
-    const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${query}`);
+    // Gọi endpoint cục bộ thay vì gọi trực tiếp từ client để có được caching và fallbacks
+    const response = await fetch(`/api/dictionary/lookup?word=${query}`);
     loading.style.display = 'none';
 
     if (response.status === 404) {
       document.getElementById('search-error-title').textContent = `Không tìm thấy từ "${query}"`;
-      document.getElementById('search-error-desc').textContent = 'Từ điển lớn không có thông tin về từ này. Vui lòng kiểm tra lại chính tả.';
+      document.getElementById('search-error-desc').textContent = 'Từ điển không có thông tin về từ này. Vui lòng kiểm tra lại chính tả.';
       errorArea.style.display = 'flex';
       return;
     }
@@ -418,14 +586,17 @@ function renderDictionaryResults(apiData) {
 
   const phonetics = extractUkUsPhonetics(entry);
 
-  // Store result globally
+  // Store result globally with CEFR and synonyms/antonyms
   state.dictionaryResult = {
     word, 
     phonetic_uk: phonetics.ukText, 
     audio_url_uk: phonetics.ukAudio, 
     phonetic_us: phonetics.usText, 
     audio_url_us: phonetics.usAudio, 
-    definitions: []
+    definitions: [],
+    cefr_level: entry.cefrLevel || null,
+    synonyms: entry.synonyms || null,
+    antonyms: entry.antonyms || null
   };
 
   let defIndex = 0;
@@ -476,11 +647,28 @@ function renderDictionaryResults(apiData) {
     </div>
   `;
 
+  // Build synonyms & antonyms section
+  let relationsHtml = '';
+  if (entry.synonyms || entry.antonyms) {
+    relationsHtml = `
+      <div class="vocab-relations" style="background: var(--md-sys-color-surface-container-low); padding: 12px; border-radius: var(--radius-sm); margin-top: 12px;">
+        ${entry.synonyms ? `<div class="relation-row"><span class="relation-label">Synonyms:</span><span class="relation-value">${escapeHtml(entry.synonyms)}</span></div>` : ''}
+        ${entry.antonyms ? `<div class="relation-row"><span class="relation-label ant">Antonyms:</span><span class="relation-value">${escapeHtml(entry.antonyms)}</span></div>` : ''}
+      </div>
+    `;
+  }
+
+  const cefrClass = entry.cefrLevel ? entry.cefrLevel.toLowerCase() : '';
+  const cefrBadgeHtml = entry.cefrLevel ? `<span class="cefr-badge ${cefrClass}">${escapeHtml(entry.cefrLevel)}</span>` : '';
+
   resultArea.innerHTML = `
     <div class="dict-word-header">
       <div style="display: flex; align-items: flex-start; justify-content: space-between;">
         <div>
-          <h1 class="dict-word-title">${escapeHtml(word)}</h1>
+          <div style="display:flex; align-items:center; gap:12px;">
+            <h1 class="dict-word-title" style="margin:0;">${escapeHtml(word)}</h1>
+            ${cefrBadgeHtml}
+          </div>
           <div class="dict-word-meta" style="display:flex; flex-direction:column; gap:6px; margin-top:8px;">
             <div style="display:flex; align-items:center; gap:8px;">
               <span style="font-size:0.75rem; font-weight:600; background:var(--md-sys-color-secondary-container); color:var(--md-sys-color-on-secondary-container); padding:2px 6px; border-radius:4px;">🇬🇧 UK</span>
@@ -498,6 +686,7 @@ function renderDictionaryResults(apiData) {
     </div>
 
     ${viBlock}
+    ${relationsHtml}
 
     <div class="def-cards-grid">
       ${defCardsHtml}
@@ -649,7 +838,10 @@ async function handleSaveDefinition(defIndex) {
     audio_url_uk: state.dictionaryResult.audio_url_uk,
     phonetic_us: state.dictionaryResult.phonetic_us,
     audio_url_us: state.dictionaryResult.audio_url_us,
-    user_example: def.example || null
+    user_example: def.example || null,
+    cefr_level: state.dictionaryResult.cefr_level,
+    synonyms: state.dictionaryResult.synonyms,
+    antonyms: state.dictionaryResult.antonyms
   };
 
   try {
@@ -824,10 +1016,24 @@ async function loadTopicDetails(topicId) {
         `;
       }
 
+      let relationsCardHtml = '';
+      if (vocab.synonyms || vocab.antonyms) {
+        relationsCardHtml = `
+          <div class="vocab-relations">
+            ${vocab.synonyms ? `<div class="relation-row"><span class="relation-label">Syn:</span><span class="relation-value">${escapeHtml(vocab.synonyms)}</span></div>` : ''}
+            ${vocab.antonyms ? `<div class="relation-row"><span class="relation-label ant">Ant:</span><span class="relation-value">${escapeHtml(vocab.antonyms)}</span></div>` : ''}
+          </div>
+        `;
+      }
+
+      const cefrClass = vocab.cefr_level ? vocab.cefr_level.toLowerCase() : '';
+      const cefrBadgeHtml = vocab.cefr_level ? `<span class="cefr-badge ${cefrClass}">${escapeHtml(vocab.cefr_level)}</span>` : '';
+
       vocabCard.innerHTML = `
-        <div class="vocab-word-header">
+        <div class="vocab-word-header" style="display:flex; align-items:center; gap:8px;">
           <span class="vocab-word-title">${escapeHtml(vocab.word)}</span>
-          ${vocab.part_of_speech ? `<span class="vocab-pos-badge">${escapeHtml(vocab.part_of_speech)}</span>` : ''}
+          ${cefrBadgeHtml}
+          ${vocab.part_of_speech ? `<span class="vocab-pos-badge" style="margin-left: auto;">${escapeHtml(vocab.part_of_speech)}</span>` : ''}
         </div>
         <div style="display:flex; flex-direction:column; gap:4px; margin: 6px 0; text-align:left;">
           <div style="display:flex; align-items:center; gap:6px; font-size:0.8rem;">
@@ -847,6 +1053,7 @@ async function loadTopicDetails(topicId) {
         </div>
         <p class="vocab-definition">${escapeHtml(vocab.definition)}</p>
         ${exampleHtml}
+        ${relationsCardHtml}
         <div class="vocab-actions">
           <md-icon-button onclick="deleteVocabulary(${vocab.id})" title="Xóa từ vựng">
             <span class="material-symbols-outlined">delete</span>
@@ -986,6 +1193,19 @@ function renderPracticeCard() {
     ? highlightWordInSentence(v.word, escapeHtml(v.user_example))
     : '<i>(Chưa có câu ví dụ mẫu từ từ điển)</i>';
 
+  let relationsHtml = '';
+  if (v.synonyms || v.antonyms) {
+    relationsHtml = `
+      <div class="vocab-relations" style="margin-top: 8px;">
+        ${v.synonyms ? `<div class="relation-row"><span class="relation-label">Synonyms:</span><span class="relation-value">${escapeHtml(v.synonyms)}</span></div>` : ''}
+        ${v.antonyms ? `<div class="relation-row"><span class="relation-label ant">Antonyms:</span><span class="relation-value">${escapeHtml(v.antonyms)}</span></div>` : ''}
+      </div>
+    `;
+  }
+
+  const cefrClass = v.cefr_level ? v.cefr_level.toLowerCase() : '';
+  const cefrBadgeHtml = v.cefr_level ? `<span class="cefr-badge ${cefrClass}" style="margin-left: 8px; vertical-align: middle;">${escapeHtml(v.cefr_level)}</span>` : '';
+
   container.innerHTML = `
     <div class="study-card-wrapper">
       <div class="study-card">
@@ -1000,8 +1220,11 @@ function renderPracticeCard() {
         <div class="study-card-front" style="padding-bottom: 8px;">
           <div class="practice-word-display" style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px;">
             <div>
-              <span style="font-size: 1.8rem; font-weight: 700; font-family: var(--font-display); color: var(--md-sys-color-primary);">${escapeHtml(v.word)}</span>
-              ${v.part_of_speech ? `<span class="vocab-pos-badge" style="margin-left: 8px; vertical-align: middle;">${escapeHtml(v.part_of_speech)}</span>` : ''}
+              <div style="display:flex; align-items:center; gap:4px;">
+                <span style="font-size: 1.8rem; font-weight: 700; font-family: var(--font-display); color: var(--md-sys-color-primary);">${escapeHtml(v.word)}</span>
+                ${cefrBadgeHtml}
+                ${v.part_of_speech ? `<span class="vocab-pos-badge" style="margin-left: 8px; vertical-align: middle;">${escapeHtml(v.part_of_speech)}</span>` : ''}
+              </div>
               
               <div style="display:flex; flex-direction:column; gap:4px; margin-top:8px; text-align:left;">
                 <div style="display:flex; align-items:center; gap:6px; font-size:0.85rem;">
@@ -1026,6 +1249,7 @@ function renderPracticeCard() {
           <p class="example-hint" style="margin: 12px 0 8px; font-size: 0.9rem; color: var(--md-sys-color-on-surface-variant); background: var(--md-sys-color-surface-container-low); padding: 12px; border-radius: var(--radius-sm); border-left: 4px solid var(--md-sys-color-primary);">
             <strong>Ví dụ mẫu:</strong> ${refExample}
           </p>
+          ${relationsHtml}
         </div>
 
         <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">

@@ -8,13 +8,14 @@ generator client {
 }
 
 model User {
-  id        Int        @id @default(autoincrement())
-  email     String     @unique
+  id        Int         @id @default(autoincrement())
+  email     String      @unique
   password  String
-  xp        Int        @default(0)
-  role      Role       @default(USER)
+  xp        Int         @default(0)
+  role      Role        @default(USER)
   progress  Progress[]
-  createdAt DateTime   @default(now())
+  reviews   ReviewLog[]
+  createdAt DateTime    @default(now())
 }
 
 enum Role {
@@ -47,8 +48,23 @@ model Progress {
   dueDate      DateTime @default(now())
   correctCount Int      @default(0)
   wrongCount   Int      @default(0)
+  cefrLevel    String?
+  synonyms     String?
+  antonyms     String?
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   topic        Topic    @relation(fields: [topicId], references: [id], onDelete: Cascade)
   
   @@unique([userId, topicId, word])
 }
+
+model ReviewLog {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  word      String
+  quality   Int
+  easiness  Float
+  interval  Int
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+

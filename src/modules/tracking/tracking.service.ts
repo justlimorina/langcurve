@@ -18,34 +18,28 @@ export class TrackingService {
       return await dbAdapter.getLearningCurve();
     }
 
-    // We execute a group by query over user's progress records in PostgreSQL
-    const stats = await prisma.progress.findMany({
+    // We fetch all historical review logs for the user from PostgreSQL
+    const logs = await prisma.reviewLog.findMany({
       where: {
         userId: userId
       },
-      select: {
-        dueDate: true,
-        easiness: true,
-        correctCount: true,
-        wrongCount: true
-      },
       orderBy: {
-        dueDate: 'asc'
+        createdAt: 'asc'
       }
     });
 
     // Process and aggregate by day
     const dayMap = new Map<string, { count: number; totalEF: number; correct: number; wrong: number }>();
 
-    for (const record of stats) {
-      const dateKey = record.dueDate.toISOString().split('T')[0]; // YYYY-MM-DD
+    for (const record of logs) {
+      const dateKey = record.createdAt.toISOString().split('T')[0]; // YYYY-MM-DD
       const existing = dayMap.get(dateKey) || { count: 0, totalEF: 0, correct: 0, wrong: 0 };
       
       dayMap.set(dateKey, {
         count: existing.count + 1,
         totalEF: existing.totalEF + record.easiness,
-        correct: existing.correct + record.correctCount,
-        wrong: existing.wrong + record.wrongCount
+        correct: existing.correct + (record.quality >= 3 ? 1 : 0),
+        wrong: existing.wrong + (record.quality < 3 ? 1 : 0)
       });
     }
 

@@ -13,6 +13,9 @@
   
   <!-- Import Material Web Components Library from CDN -->
   <script type="module" src="https://esm.sh/@material/web@1.5.0/all.js"></script>
+  
+  <!-- Chart.js CDN for Curve Analytics -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
   <!-- SCRIM OVERLAY (M3 Modal Drawer backdrop) -->
@@ -189,12 +192,19 @@
           </div>
         </div>
 
+        <!-- Chart Section -->
+        <div class="chart-section" style="background-color: var(--md-sys-color-surface-container); padding: 24px; border-radius: var(--radius-md); margin-bottom: 20px; border: 1px solid var(--md-sys-color-outline-variant);">
+          <h3 style="font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; margin: 0 0 16px 0; color: var(--md-sys-color-primary);">Đường cong học tập (Curve Analytics)</h3>
+          <div style="position: relative; height: 300px; width: 100%;">
+            <canvas id="learningCurveChart"></canvas>
+          </div>
+        </div>
+
         <!-- Video Section -->
-        <div class="video-section">
-          <h3 class="video-section-title">Video học tập</h3>
-          <div class="video-placeholder" id="dash-video-area">
-            <span class="material-symbols-outlined" style="font-size: 48px; opacity: 0.6;">play_circle</span>
-            <p>Video hướng dẫn sẽ được cập nhật tại đây</p>
+        <div class="video-section" style="background-color: var(--md-sys-color-surface-container); border: 1px solid var(--md-sys-color-outline-variant); border-radius: var(--radius-md); padding: 24px; color: var(--md-sys-color-on-surface);">
+          <h3 class="video-section-title" style="font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; margin: 0 0 16px 0; color: var(--md-sys-color-primary);">Video học tập</h3>
+          <div id="dash-video-area" class="video-grid">
+            <!-- Loaded dynamically by app.js -->
           </div>
         </div>
       </section>

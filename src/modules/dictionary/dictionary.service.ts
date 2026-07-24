@@ -147,6 +147,31 @@ export class DictionaryService {
 
     // 4. Save to cache layers
     if (resultPayload) {
+      if (Array.isArray(resultPayload) && resultPayload[0]) {
+        const entry = resultPayload[0];
+        if (!entry.cefrLevel) {
+          entry.cefrLevel = this.classifyCefr(lemma);
+        }
+        if (entry.synonyms === undefined || entry.antonyms === undefined) {
+          const synonymsList: string[] = [];
+          const antonymsList: string[] = [];
+          if (Array.isArray(entry.meanings)) {
+            for (const m of entry.meanings) {
+              if (Array.isArray(m.synonyms)) synonymsList.push(...m.synonyms);
+              if (Array.isArray(m.antonyms)) antonymsList.push(...m.antonyms);
+              if (Array.isArray(m.definitions)) {
+                for (const d of m.definitions) {
+                  if (Array.isArray(d.synonyms)) synonymsList.push(...d.synonyms);
+                  if (Array.isArray(d.antonyms)) antonymsList.push(...d.antonyms);
+                }
+              }
+            }
+          }
+          entry.synonyms = [...new Set(synonymsList)].slice(0, 10).join(', ');
+          entry.antonyms = [...new Set(antonymsList)].slice(0, 10).join(', ');
+        }
+      }
+
       try {
         // Save to MongoDB
         await docStoreAdapter.saveWord(lemma, apiSource, resultPayload);
@@ -281,7 +306,10 @@ export class DictionaryService {
             ]
           }
         ],
-        source: 'google-tts'
+        source: 'google-tts',
+        cefrLevel: this.classifyCefr(lemma),
+        synonyms: '',
+        antonyms: ''
       }
     ];
   }
@@ -314,5 +342,31 @@ export class DictionaryService {
     const response = await fetch(url);
     if (!response.ok) throw new Error(`Free Dictionary API error status ${response.status}`);
     return await response.json();
+  }
+
+  private classifyCefr(word: string): string {
+    const clean = word.toLowerCase().trim();
+    
+    // Static lists of common words for representative CEFR classification
+    const a1 = new Set(['be', 'have', 'do', 'say', 'go', 'get', 'make', 'know', 'think', 'take', 'see', 'come', 'want', 'look', 'use', 'find', 'give', 'tell', 'work', 'call', 'try', 'ask', 'need', 'feel', 'become', 'leave', 'put', 'mean', 'keep', 'let', 'begin', 'seem', 'help', 'talk', 'turn', 'start', 'show', 'hear', 'play', 'run', 'move', 'like', 'live', 'believe', 'hold', 'bring', 'write', 'provide', 'sit', 'stand', 'lose', 'pay', 'meet', 'include', 'continue', 'set', 'learn', 'change', 'lead', 'understand', 'watch', 'follow', 'stop', 'create', 'speak', 'read', 'allow', 'add', 'spend', 'grow', 'open', 'walk', 'win', 'offer', 'love', 'remember', 'consider', 'appear', 'buy', 'wait', 'serve', 'die', 'send', 'expect', 'build', 'stay', 'fall', 'cut', 'reach', 'kill', 'remain', 'hello', 'good', 'bad', 'happy', 'sad', 'english', 'book', 'time', 'day', 'year', 'water']);
+    const a2 = new Set(['study', 'travel', 'prepare', 'finish', 'decide', 'arrive', 'explain', 'suggest', 'receive', 'discuss', 'contain', 'design', 'manage', 'improve', 'develop', 'require', 'product', 'program', 'project', 'client', 'career', 'office', 'meeting', 'finance', 'hotel', 'flight', 'dinner', 'lunch', 'breakfast', 'ticket', 'station', 'airport', 'holiday', 'museum', 'weather', 'winter', 'summer', 'autumn', 'spring', 'family', 'friend', 'sister', 'brother', 'mother', 'father', 'house', 'apartment']);
+    const b1 = new Set(['algorithm', 'responsive', 'synergy', 'itinerary', 'achieve', 'benefit', 'challenge', 'compare', 'confirm', 'discover', 'encourage', 'establish', 'focus', 'identify', 'imagine', 'intend', 'measure', 'observe', 'prevent', 'realize', 'reduce', 'reflect', 'remove', 'replace', 'satisfy', 'solve', 'structure', 'support', 'trust', 'value', 'career', 'culture', 'economy', 'education', 'environment', 'health', 'industry', 'opinion', 'politics', 'society', 'technology']);
+    const b2 = new Set(['collaborate', 'innovate', 'optimize', 'specialize', 'implement', 'integrate', 'evaluate', 'coordinate', 'negotiate', 'transform', 'advocate', 'facilitate', 'generate', 'simulate', 'sustain', 'validate', 'diversity', 'framework', 'infrastructure', 'strategy', 'dynamic', 'perspective', 'significant', 'alternative', 'efficient', 'flexible', 'sustainable']);
+    const c1 = new Set(['detriment', 'ubiquitous', 'meticulous', 'anomaly', 'paradigm', 'empirical', 'cognitive', 'scrutinize', 'ameliorate', 'equivocal', 'lucid', 'precarious', 'superfluous', 'transient', 'ephemeral', 'aesthetic', 'pragmatic', 'resolute', 'tenacious', 'vulnerable', 'conundrum', 'discrepancy', 'implication', 'predecessor', 'subsequent']);
+    const c2 = new Set(['exacerbate', 'obsolescence', 'juxtaposition', 'cacophony', 'epiphany', 'surreptitious', 'fastidious', 'quintessential', 'capricious', 'nefarious', 'recalcitrant', 'sycophant', 'ubiquity', 'paradoxical', 'idiosyncrasy', 'indefatigable', 'mellifluous', 'panacea', 'serendipity', 'zenith']);
+
+    if (a1.has(clean)) return 'A1';
+    if (a2.has(clean)) return 'A2';
+    if (b1.has(clean)) return 'B1';
+    if (b2.has(clean)) return 'B2';
+    if (c1.has(clean)) return 'C1';
+    if (c2.has(clean)) return 'C2';
+
+    // Simple length & suffix fallback rules if not in static list
+    if (clean.length <= 4) return 'A2';
+    if (clean.length <= 6) return 'B1';
+    if (clean.length <= 8) return 'B2';
+    if (clean.length <= 11) return 'C1';
+    return 'C2';
   }
 }

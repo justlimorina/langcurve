@@ -1,3 +1,11 @@
+[24/07/2026]
+CẬP NHẬT:
+- Tích hợp biểu đồ "Đường cong học tập" (Curve Analytics) sử dụng Chart.js trực tiếp trên màn hình Dashboard, hiển thị tiến độ học từ vựng và chỉ số Easiness Factor (EF) trung bình.
+- Triển khai bảng lưu lịch sử ôn tập `ReviewLog` trên cả PostgreSQL (Prisma) và SQLite fallback, giúp lưu vết lịch sử ôn tập thay vì bị ghi đè thông tin cũ.
+- Tự động phân loại cấp độ từ vựng theo CEFR (A1-C2) và trích xuất từ đồng nghĩa/trái nghĩa từ API từ điển trực tuyến để làm giàu dữ liệu học thuật.
+- Thay đổi cơ chế tra từ điển từ phía client sang sử dụng API backend `/api/dictionary/lookup` để khai thác tối đa tính năng Redis caching & MongoDB fallback.
+- Tích hợp danh sách video học tập tiếng Anh trực quan từ YouTube (sử dụng Iframe Player) thay thế khung video placeholder tĩnh trên Dashboard.
+
 [20/07/2026]
 CẬP NHẬT:
 - Tối ưu hóa nguồn phát âm UK/US: Nâng cấp lên Enriched Free Dictionary API tích hợp tự động phát âm chất lượng cao từ Wiktionary và cơ chế tự động fallback thông minh sang Google Translate Text-to-Speech (TTS) cho cả hai dialect UK và US. Nhờ đó đảm bảo 100% từ vựng tra cứu đều có đầy đủ phiên âm và phát âm chuẩn của cả hai giọng.
