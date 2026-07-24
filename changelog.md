@@ -5,6 +5,7 @@ CẬP NHẬT:
 - Tự động phân loại cấp độ từ vựng theo CEFR (A1-C2) và trích xuất từ đồng nghĩa/trái nghĩa từ API từ điển trực tuyến để làm giàu dữ liệu học thuật.
 - Thay đổi cơ chế tra từ điển từ phía client sang sử dụng API backend `/api/dictionary/lookup` để khai thác tối đa tính năng Redis caching & MongoDB fallback.
 - Tích hợp danh sách video học tập tiếng Anh trực quan từ YouTube (sử dụng Iframe Player) thay thế khung video placeholder tĩnh trên Dashboard.
+- Sửa lỗi căn lề khoảng cách (margin-bottom) của khối Từ đồng nghĩa/Trái nghĩa để không bị dính vào các thẻ định nghĩa bên dưới trong màn hình tra cứu từ điển.
 
 [20/07/2026]
 CẬP NHẬT:

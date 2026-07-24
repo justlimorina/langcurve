@@ -651,7 +651,7 @@ function renderDictionaryResults(apiData) {
   let relationsHtml = '';
   if (entry.synonyms || entry.antonyms) {
     relationsHtml = `
-      <div class="vocab-relations" style="background: var(--md-sys-color-surface-container-low); padding: 12px; border-radius: var(--radius-sm); margin-top: 12px;">
+      <div class="vocab-relations" style="background: var(--md-sys-color-surface-container-low); padding: 12px; border-radius: var(--radius-sm); margin-top: 12px; margin-bottom: 20px;">
         ${entry.synonyms ? `<div class="relation-row"><span class="relation-label">Synonyms:</span><span class="relation-value">${escapeHtml(entry.synonyms)}</span></div>` : ''}
         ${entry.antonyms ? `<div class="relation-row"><span class="relation-label ant">Antonyms:</span><span class="relation-value">${escapeHtml(entry.antonyms)}</span></div>` : ''}
       </div>
